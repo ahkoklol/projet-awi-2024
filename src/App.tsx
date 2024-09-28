@@ -5,6 +5,8 @@ import { Auth } from './components/auth';
 import { database, auth } from './config/firebase';
 import { useState, useEffect } from 'react';
 import { getDocs, collection, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { storage } from './config/firebase';
+import { ref, uploadBytes } from 'firebase/storage';
 
 interface Game {
   id: string;
@@ -16,11 +18,11 @@ interface Game {
 
 function App() {
   const [gamesList, setGamesList] = useState<Game[]>([]); 
-
   const [newGameTitle, setNewGameTitle] = useState('');
   const [newReleaseDate, setNewReleaseDate] = useState(0);
   const [isStillActive, setIsStillActive] = useState(false);
   const [updatedTitle, setUpdatedTitle] = useState('');
+  const [fileUpload, setFileUpload] = useState<File | null>(null);
 
   const gamesCollectionRef = collection(database, "games");
 
@@ -49,7 +51,7 @@ function App() {
     } catch (error) {
       console.log('Error adding document', error);
     }
-  }
+  };
 
   // DELETE request to delete a game
   const deleteGame = async (id: string) => {
@@ -61,40 +63,70 @@ function App() {
     } catch (error) {
       console.log('Error deleting document', error);
     }
-  }
+  };
 
   // PUT request to update a game
   const updateGame = async (id: string) => {
     try {
       const gameDoc = doc(database, "games", id);
-      await updateDoc(gameDoc, {title: updatedTitle});
+      await updateDoc(gameDoc, { title: updatedTitle });
       getGamesList();
-      console.log('Document deleted, list updated');
+      console.log('Document updated, list updated');
     } catch (error) {
-      console.log('Error deleting document', error);
+      console.log('Error updating document', error);
     }
-  }
+  };
+
+  // POST to upload file
+  const uploadFile = async () => {
+    try {
+      if (!fileUpload) {
+        console.log('No file selected');
+        return;
+      }
+      const filesFolderRef = ref(storage, `ProjectFiles/${fileUpload.name}`);
+      await uploadBytes(filesFolderRef, fileUpload);
+      console.log('File uploaded');
+    } catch (error) {
+      console.log('Error uploading file', error);
+    }
+  };
 
   return (
-    <div className="App"><Auth /><div>
-
+    <div className="App">
+      <Auth />
       <div>
-        <input placeholder="Game title" onChange={(e) => setNewGameTitle(e.target.value)}/>
-        <input placeholder="Release date" type="number" onChange={(e) => setNewReleaseDate(Number(e.target.value))}/>
-        <input type="checkbox" checked={isStillActive} onChange={(e) => setIsStillActive(e.target.checked)}/>
-        <label>Still active</label>
-        <button onClick={onSubmitGame}>Add game</button>
-      </div>
+        <div>
+          <input placeholder="Game title" onChange={(e) => setNewGameTitle(e.target.value)} />
+          <input placeholder="Release date" type="number" onChange={(e) => setNewReleaseDate(Number(e.target.value))} />
+          <input type="checkbox" checked={isStillActive} onChange={(e) => setIsStillActive(e.target.checked)} />
+          <label>Still active</label>
+          <button onClick={onSubmitGame}>Add game</button>
+        </div>
 
         {gamesList.map((game) => (
-          <div key={game.id}> {/* Added a key prop for each child */}
+          <div key={game.id}>
             <h1>{game.title}</h1>
-            {game.releaseDate && <p>Release date: {game.releaseDate}</p>} {/* Conditional rendering */}
+            {game.releaseDate && <p>Release date: {game.releaseDate}</p>}
             <button onClick={() => deleteGame(game.id)}>Delete Game</button>
-            <input placeholder="new title..." onChange={(e) => setUpdatedTitle(e.target.value)}/>
+            <input placeholder="new title..." onChange={(e) => setUpdatedTitle(e.target.value)} />
             <button onClick={() => updateGame(game.id)}>Update title</button>
           </div>
         ))}
+      </div>
+      <div>
+        <input 
+          type="file" 
+          onChange={(e) => {
+            const files = e.target.files;
+            if (files && files.length > 0) {
+              setFileUpload(files[0]);
+            } else {
+              setFileUpload(null);
+            }
+          }} 
+        />
+        <button onClick={uploadFile}>Upload File</button>
       </div>
     </div>
   );
