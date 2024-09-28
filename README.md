@@ -1,1 +1,3 @@
-# projet-awi-2024
+testing tools:
+- vitest
+- @testing-library/react
