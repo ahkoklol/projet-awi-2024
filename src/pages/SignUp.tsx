@@ -64,9 +64,23 @@ function SignUp() {
       toast.success('User registered successfully!');
       console.log('User registered successfully:', user);
       navigate('/'); // Only navigate if registration is successful
-    } catch (error) {
+    } catch (error: any) {
+      // Handle specific Firebase errors during signup
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          toast.error('This email is already registered.');
+          break;
+        case 'auth/invalid-email':
+          toast.error('Invalid email format.');
+          break;
+        case 'auth/weak-password':
+          toast.error('Password is too weak. Please use a stronger password.');
+          break;
+        default:
+          toast.error('Failed to register. Please try again.');
+          break;
+      }
       console.error('Error registering user:', error);
-      toast.error('Failed to register. Please try again.');
     } finally {
       setIsLoading(false);
     }

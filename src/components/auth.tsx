@@ -10,6 +10,7 @@ export const Auth = () => {
 
     // check the user
     console.log(auth?.currentUser?.email)
+    console.log(auth?.currentUser?.uid)
 
     const signIn = async () => {
         try {
