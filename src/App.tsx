@@ -7,12 +7,12 @@ import Footer from './components/footer';
 function App() {
 
   return (
-    <div>
+    <div className="app-container">
       <Navbar />
       <ToastContainer />
-        <div>
-          <Outlet />
-        </div>
+      <div className="content">
+        <Outlet />
+      </div>
       <Footer />
     </div>
   );

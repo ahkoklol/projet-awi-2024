@@ -148,7 +148,7 @@ export default function ProfilePage() {
 
     if (selectedMenu === 'Sales Dashboard') {
       return (
-        <Box sx={{ display: 'flex', marginTop: '-4rem' }}>
+        <Box sx={{ display: 'flex', marginTop: '-5rem' }}>
           <Box
             component="main"
             sx={{
