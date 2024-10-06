@@ -37,7 +37,7 @@ function SignUp() {
 
     // Validate that a role has been selected
     if (!role) {
-      toast.error('Please select a role (buyer or vendor)');
+      toast.error('Please select a role (buyer or seller)');
       return; // Prevent form submission if no role is selected
     }
 
@@ -56,9 +56,9 @@ function SignUp() {
         lastname: surname,
         phone: phone,
         address: address,
-        role: role, // Role chosen from 'buyer' or 'vendor'
+        role: role, // Role chosen from 'buyer' or 'seller'
         subscription_id: '/collection/Subscription', // will be added later when choosing a subscription
-        vendor_specific_data: role === 'vendor' ? {} : '', // For vendors, add specific data if needed
+        seller_specific_data: role === 'seller' ? {} : '', // For sellers, add specific data if needed
       });
 
       toast.success('User registered successfully!');
@@ -192,7 +192,7 @@ function SignUp() {
                     row
                   >
                     <FormControlLabel value="buyer" control={<Radio />} label="Buyer" />
-                    <FormControlLabel value="vendor" control={<Radio />} label="Vendor" />
+                    <FormControlLabel value="Seller" control={<Radio />} label="Seller" />
                   </RadioGroup>
                 </Grid>
 

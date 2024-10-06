@@ -6,6 +6,8 @@ import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } 
 import SignUp from './pages/SignUp.tsx'
 import Login from './pages/login.tsx'
 import ProfilePage from './pages/profile.tsx'
+import GameViewPage from './pages/games.tsx'
+import GameDetailsPage from './pages/gameDetails.tsx'
 
 const router = createBrowserRouter(createRoutesFromElements(
 
@@ -13,6 +15,8 @@ const router = createBrowserRouter(createRoutesFromElements(
     <Route path="signup" element={<SignUp />} />
     <Route path="login" element={<Login />} />
     <Route path="profile" element={<ProfilePage />} />
+    <Route path="allgames" element={<GameViewPage />} />
+    <Route path="game/:gameName" element={<GameDetailsPage />} />
   </Route>
 
 ));

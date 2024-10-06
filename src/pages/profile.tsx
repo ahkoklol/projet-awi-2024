@@ -22,7 +22,7 @@ interface UserProfile {
   phone: number;
   role: string;
   subscription_id: string;
-  vendor_specific_data: string;
+  seller_specific_data: string;
   date_joined: string;
 }
 
@@ -31,7 +31,7 @@ interface GameDetails {
   name: string;
   price: number; 
   stock_status: string;
-  vendor_id: string;
+  seller_id: string;
   discount: number;
   deposit_fee: number;
 }
@@ -43,7 +43,7 @@ export default function ProfilePage() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null); // For the menu in AppBar
   const [selectedMenu, setSelectedMenu] = useState('Edit Profile'); // For tracking selected menu item
   const [newGamePrice, setNewGamePrice] = useState(0);
-  const [vendorId, setVendorId] = useState('');
+  const [sellerId, setSellerId] = useState('');
   const [discount, setDiscount] = useState(0);
   const [stockStatus, setStockStatus] = useState('available');
   const [gameNames, setGameNames] = useState<string[]>([]);
@@ -75,7 +75,7 @@ export default function ProfilePage() {
             const userDoc = querySnapshot.docs[0]; // Assume unique email
             const data = userDoc.data() as UserProfile;
             setUserProfile(data);
-            setVendorId(userDoc.id);
+            setSellerId(userDoc.id);
           } else {
             console.log('No user document found in Firestore.');
           }
@@ -95,10 +95,10 @@ export default function ProfilePage() {
   }, []);
 
   useEffect(() => {
-    if (vendorId) {
-      fetchUserGames(vendorId);
+    if (sellerId) {
+      fetchUserGames(sellerId);
     }
-  }, [vendorId])
+  }, [sellerId])
 
   useEffect(() => {
     // Fetch all game names from GameView collection
@@ -152,7 +152,7 @@ export default function ProfilePage() {
       return;
     }
     try {
-      await addDoc(gameDetailsCollectionRef, { name: selectedGameName, price: newGamePrice, vendor_id: vendorId, discount: discount, stock_status: stockStatus });
+      await addDoc(gameDetailsCollectionRef, { name: selectedGameName, price: newGamePrice,seller_id: sellerId, discount: discount, stock_status: stockStatus });
       console.log('Game added successfully!');
       toast.success('Game added successfully!');
       // reset fields
@@ -160,7 +160,7 @@ export default function ProfilePage() {
       setNewGamePrice(0);
       setDiscount(0);
       setStockStatus('available');
-      fetchUserGames(vendorId); // Refresh the list of games
+      fetchUserGames(sellerId); // Refresh the list of games
     } catch (error) {
       console.log('Error adding document', error);
     }
@@ -186,15 +186,16 @@ export default function ProfilePage() {
       setNewGameViewName('');
       setNewGameViewDescription('');
       setNewGameViewPublisher('');
+      setNewGameViewReleaseDate(0);
     } catch (error) {
       console.log('Error adding document', error);
     }
   };
 
   // GET request to fetch all games deposited by the current user
-  const fetchUserGames = async (vendorId: string) => {
+  const fetchUserGames = async (sellerId: string) => {
     try {
-      const gamesQuery = query(gameDetailsCollectionRef, where('vendor_id', '==', vendorId));
+      const gamesQuery = query(gameDetailsCollectionRef, where('seller_id', '==', sellerId));
       const querySnapshot = await getDocs(gamesQuery);
       
       const gamesList: GameDetails[] = querySnapshot.docs.map((doc) => ({
@@ -234,7 +235,7 @@ export default function ProfilePage() {
         </ListItem>
 
         {/* Conditional rendering based on user role */}
-        {userProfile?.role === 'vendor' && (
+        {userProfile?.role === 'seller' && (
           <>
             <ListItem disablePadding>
               <ListItemButton onClick={() => setSelectedMenu('Sales Dashboard')}>
@@ -514,7 +515,7 @@ export default function ProfilePage() {
                   />
                   <TextField
                     label="Release Date"
-                    value={newGameViewName}
+                    value={newGameViewReleaseDate}
                     onChange={(e) => setNewGameViewReleaseDate(parseFloat(e.target.value))}
                     fullWidth
                     type="number"
