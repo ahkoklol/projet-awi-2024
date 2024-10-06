@@ -54,6 +54,7 @@ const Navbar: React.FC = () => {
           <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
             <MenuItem component={Link} to="/" onClick={handleClose} sx={{ color: 'black' }}>Home</MenuItem>
             {user && (<MenuItem component={Link} to="/profile" onClick={handleClose} sx={{ color: 'black' }}>Account Dashboard</MenuItem>)}
+            {user && (<MenuItem component={Link} to="/allgames" onClick={handleClose} sx={{ color: 'black' }}>Games</MenuItem>)}
             {!user && (<MenuItem component={Link} to="/login" onClick={handleClose} sx={{ color: 'black' }}>Login</MenuItem>)}
             {!user && (<MenuItem component={Link} to="/signup" onClick={handleClose} sx={{ color: 'black' }}>Signup</MenuItem>)}
             {user && (<MenuItem component={Link} to="/" onClick={logout} sx={{ color: 'black' }}>Logout</MenuItem>)}
