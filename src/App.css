@@ -24,6 +24,10 @@ footer {
   text-align: center;
 }
 
+.Toastify__toast-container--custom {
+  top: 80px !important; /* Adjust this value as needed */
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;

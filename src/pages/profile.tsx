@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { query, where, getDocs, collection, addDoc, doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
+import { query, where, getDocs, collection, addDoc } from 'firebase/firestore';
 import { Container, Typography, List, Badge, SelectChangeEvent, ListItem, Grid, FormControl, InputLabel, Select, Stack, Card, TextField, CardContent, Button, AppBar, ListItemButton, ListItemIcon, ListItemText, Paper, CircularProgress, Box, CssBaseline, Toolbar, Divider, Drawer, IconButton, Menu, MenuItem } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import ShoppingBasketIcon from '@mui/icons-material/ShoppingBasket';
@@ -118,25 +118,11 @@ export default function ProfilePage() {
   }, []);
 
   useEffect(() => {
-    if (sellerId) {
+    if ((selectedMenu === 'Stock' || selectedMenu === 'Deposit Product') && sellerId) {
       fetchUserGames(sellerId);
+      fetchGameNames();
     }
-  }, [sellerId])
-
-  useEffect(() => {
-    // Fetch all game names from GameView collection
-    const fetchGameNames = async () => {
-      try {
-        const gameNamesSnapshot = await getDocs(gameViewCollectionRef);
-        const gameNamesList: string[] = gameNamesSnapshot.docs.map((doc) => doc.data().name);
-        setGameNames(gameNamesList);
-      } catch (error) {
-        console.error('Error fetching game names:', error);
-      }
-    };
-
-    fetchGameNames();
-  }, []);
+  }, [selectedMenu, sellerId]);
 
   useEffect(() => {
     // GET request to fetch the user's subscription
@@ -209,6 +195,16 @@ export default function ProfilePage() {
     }
   };
 
+  const fetchGameNames = async () => {
+    try {
+      const gameNamesSnapshot = await getDocs(gameViewCollectionRef);
+      const gameNamesList: string[] = gameNamesSnapshot.docs.map((doc) => doc.data().name);
+      setGameNames(gameNamesList);
+    } catch (error) {
+      console.error('Error fetching game names:', error);
+    }
+  };
+
   const handleGameNameChange = (event: SelectChangeEvent<string>) => {
     setSelectedGameName(event.target.value);
   };
@@ -262,6 +258,10 @@ export default function ProfilePage() {
   
   // POST request to create a new game view
   const onSubmitGameView = async () => {
+    if (!newGameViewName.trim() || !newGameViewDescription.trim() || !newGameViewPublisher.trim() || !newGameViewReleaseDate) {
+      toast.error('All fields are required. Please fill out every field.');
+      return; // Stop further execution if any field is empty
+    }
     try {
       // Step 1: Query Firestore to check if a game with the same name already exists
       const gameViewQuery = query(gameViewCollectionRef, where('name', '==', newGameViewName));

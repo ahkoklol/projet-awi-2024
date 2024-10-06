@@ -11,7 +11,18 @@ function App() {
     <BasketProvider>
       <div className="app-container">
         <Navbar />
-        <ToastContainer />
+        <ToastContainer
+          position="top-right" // Still keep it on the top-right
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          className="Toastify__toast-container--custom" // Apply custom class
+        />
         <div className="content">
           <Outlet />
         </div>

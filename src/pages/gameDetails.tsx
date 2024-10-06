@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { query, where, getDocs, collection, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { query, where, getDocs, collection, doc, getDoc } from 'firebase/firestore';
 import { useParams } from 'react-router-dom';
 import { Grid, Card, CardContent, Typography, CircularProgress, Container, Button } from '@mui/material';
 import { database } from '../config/firebase';
