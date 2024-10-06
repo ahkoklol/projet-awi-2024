@@ -1,23 +1,21 @@
-// src/components/navbar.tsx
 import React from "react";
 import { AppBar, Toolbar, Typography, IconButton, Menu, MenuItem, Badge } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ShoppingBasketIcon from '@mui/icons-material/ShoppingBasket';
 import { Link } from "react-router-dom";
 import { auth } from "../config/firebase";
 import { signOut } from 'firebase/auth';
 import useAuth from "../hooks/useAuth";
 import { toast } from "react-toastify";
-import { useBasket } from "../context/BasketContext"; // Import useBasket hook
+import { useBasket } from "../context/BasketContext";
 
 const Navbar: React.FC = () => {
   const user = useAuth();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const { basketItems } = useBasket(); // Access basketItems from context
+  const { basketItems } = useBasket();
 
   const handleClick: React.MouseEventHandler = (event) => {
-    setAnchorEl(event.currentTarget as HTMLElement); // Cast event.currentTarget to HTMLElement
+    setAnchorEl(event.currentTarget as HTMLElement);
   };
 
   const handleClose: React.MouseEventHandler = () => {
@@ -42,19 +40,20 @@ const Navbar: React.FC = () => {
         </Typography>
 
         <div>
-          {/* Basket Icon with Badge for number of items */}
+          {user && (
           <IconButton component={Link} to="/basket" color="inherit">
             <Badge badgeContent={basketItems.length} color="error">
               <ShoppingBasketIcon />
             </Badge>
           </IconButton>
+          )}
 
           <IconButton color="inherit" onClick={handleClick}>
             <MenuIcon />
           </IconButton>
           <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
             <MenuItem component={Link} to="/" onClick={handleClose} sx={{ color: 'black' }}>Home</MenuItem>
-            {user && (<MenuItem component={Link} to="/profile" onClick={handleClose} sx={{ color: 'black' }}>Profile</MenuItem>)}
+            {user && (<MenuItem component={Link} to="/profile" onClick={handleClose} sx={{ color: 'black' }}>Account Dashboard</MenuItem>)}
             {!user && (<MenuItem component={Link} to="/login" onClick={handleClose} sx={{ color: 'black' }}>Login</MenuItem>)}
             {!user && (<MenuItem component={Link} to="/signup" onClick={handleClose} sx={{ color: 'black' }}>Signup</MenuItem>)}
             {user && (<MenuItem component={Link} to="/" onClick={logout} sx={{ color: 'black' }}>Logout</MenuItem>)}

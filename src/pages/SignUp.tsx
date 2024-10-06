@@ -56,14 +56,14 @@ function SignUp() {
         lastname: surname,
         phone: phone,
         address: address,
-        role: role, // Role chosen from 'buyer' or 'seller'
-        subscription_id: '/collection/Subscription', // will be added later when choosing a subscription
-        seller_specific_data: role === 'seller' ? {} : '', // For sellers, add specific data if needed
+        role: role,
+        subscription_id: 'null', // default subscription null = no plan
+        seller_specific_data: role === 'seller' ? {} : '', 
       });
 
       toast.success('User registered successfully!');
       console.log('User registered successfully:', user);
-      navigate('/'); // Only navigate if registration is successful
+      navigate('/'); 
     } catch (error: any) {
       // Handle specific Firebase errors during signup
       switch (error.code) {

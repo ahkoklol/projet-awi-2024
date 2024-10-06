@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { query, where, getDocs, collection, addDoc } from 'firebase/firestore';
-import { Container, Typography, List, SelectChangeEvent, ListItem, Grid, FormControl, InputLabel, Select, Stack, Card, TextField, CardContent, Button, AppBar, ListItemButton, ListItemIcon, ListItemText, Paper, CircularProgress, Box, CssBaseline, Toolbar, Divider, Drawer, IconButton, Menu, MenuItem } from '@mui/material';
+import { query, where, getDocs, collection, addDoc, doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
+import { Container, Typography, List, Badge, SelectChangeEvent, ListItem, Grid, FormControl, InputLabel, Select, Stack, Card, TextField, CardContent, Button, AppBar, ListItemButton, ListItemIcon, ListItemText, Paper, CircularProgress, Box, CssBaseline, Toolbar, Divider, Drawer, IconButton, Menu, MenuItem } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
+import ShoppingBasketIcon from '@mui/icons-material/ShoppingBasket';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -11,6 +12,7 @@ import { auth, database } from '../config/firebase';
 import { signOut } from 'firebase/auth';
 import useAuth from "../hooks/useAuth";
 import { toast } from "react-toastify";
+import { useBasket } from '../context/BasketContext';
 
 const drawerWidth = 240;
 
@@ -23,7 +25,9 @@ interface UserProfile {
   role: string;
   subscription_id: string;
   seller_specific_data: string;
-  date_joined: string;
+  subscription_start: Date;
+  subscription_end: Date;
+  date_joined: string
 }
 
 interface GameDetails {
@@ -34,6 +38,14 @@ interface GameDetails {
   seller_id: string;
   discount: number;
   deposit_fee: number;
+}
+
+interface Subscription {
+  description: string;
+  commission_fee: number;
+  deposit_fee: number;
+  price: number;
+  type: string;
 }
 
 export default function ProfilePage() {
@@ -53,6 +65,10 @@ export default function ProfilePage() {
   const [newGameViewPublisher, setNewGameViewPublisher] = useState('');
   const [newGameViewReleaseDate, setNewGameViewReleaseDate] = useState(0);
   const [userGames, setUserGames] = useState<GameDetails[]>([]);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [availableSubscriptions, setAvailableSubscriptions] = useState<Subscription[]>([]);
+  const [selectedSubscription, setSelectedSubscription] = useState<Subscription | null>(null);
+  const { addItemToBasket, itemCount } = useBasket();
   // const [newGameViewStockStatus, setNewGameViewStockStatus] = useState(''); link to all matches to name count
   // const [depositFee, setDepositFee] = useState(0); link to subscription
 
@@ -74,7 +90,14 @@ export default function ProfilePage() {
           if (!querySnapshot.empty) {
             const userDoc = querySnapshot.docs[0]; // Assume unique email
             const data = userDoc.data() as UserProfile;
-            setUserProfile(data);
+            // If subscription_start and subscription_end are Firestore Timestamps, convert them to Date objects
+            const subscriptionStart = data.subscription_start ? (data.subscription_start as any).toDate() : null;
+            const subscriptionEnd = data.subscription_end ? (data.subscription_end as any).toDate() : null;
+            setUserProfile({
+              ...data,
+              subscription_start: subscriptionStart,
+              subscription_end: subscriptionEnd,
+            });
             setSellerId(userDoc.id);
           } else {
             console.log('No user document found in Firestore.');
@@ -114,6 +137,77 @@ export default function ProfilePage() {
 
     fetchGameNames();
   }, []);
+
+  useEffect(() => {
+    // GET request to fetch the user's subscription
+    const fetchSubscription = async (subscriptionId: string) => {
+      try {
+        // Query the Subscription collection where type matches subscriptionId
+        const subscriptionsRef = collection(database, 'Subscription');
+        const q = query(subscriptionsRef, where('type', '==', subscriptionId));
+        const querySnapshot = await getDocs(q);
+  
+        if (!querySnapshot.empty) {
+          const subscriptionData = querySnapshot.docs[0].data() as Subscription;
+          setSubscription(subscriptionData);
+        } else {
+          console.log('No subscription found');
+        }
+      } catch (error) {
+        console.error('Error fetching subscription:', error);
+      }
+    };
+  
+    if (userProfile?.subscription_id) {
+      fetchSubscription(userProfile.subscription_id);
+    }
+  }, [userProfile?.subscription_id]);
+
+  useEffect(() => {
+    // GET request to fetch all available subscriptions
+    const fetchAvailableSubscriptions = async () => {
+      try {
+        const subscriptionCollectionRef = collection(database, 'Subscription');
+        const subscriptionSnapshot = await getDocs(subscriptionCollectionRef);
+        const subscriptionList: Subscription[] = subscriptionSnapshot.docs.map(doc => doc.data() as Subscription);
+        setAvailableSubscriptions(subscriptionList);
+      } catch (error) {
+        console.error('Error fetching available subscriptions:', error);
+      }
+    };
+  
+    fetchAvailableSubscriptions();
+  }, []);
+  
+  const handleSubscriptionChange = (event: SelectChangeEvent<string>) => {
+    const selectedSubscriptionId = event.target.value;
+    const foundSubscription = availableSubscriptions.find(sub => sub.type === selectedSubscriptionId);
+  
+    if (foundSubscription) {
+      setSelectedSubscription(foundSubscription);
+    }
+  };
+
+  const addSubscriptionToBasket = async () => {
+    if (!selectedSubscription) {
+      toast.error('Please select a subscription.');
+      return;
+    }
+  
+    try {
+      const basketItem = {
+        id: selectedSubscription.type,
+        name: selectedSubscription.description,
+        price: selectedSubscription.price,
+      };
+  
+      await addItemToBasket(basketItem); // Use basket context to add item to the basket
+      toast.success('Subscription added to your basket.');
+    } catch (error) {
+      console.error('Error adding subscription to basket:', error);
+      toast.error('Failed to add subscription to the basket.');
+    }
+  };
 
   const handleGameNameChange = (event: SelectChangeEvent<string>) => {
     setSelectedGameName(event.target.value);
@@ -238,6 +332,14 @@ export default function ProfilePage() {
         {userProfile?.role === 'seller' && (
           <>
             <ListItem disablePadding>
+              <ListItemButton onClick={() => setSelectedMenu('Subscription')}>
+                <ListItemIcon>
+                  <MailIcon />
+                </ListItemIcon>
+                <ListItemText primary="Subscription" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
               <ListItemButton onClick={() => setSelectedMenu('Sales Dashboard')}>
                 <ListItemIcon>
                   <MailIcon />
@@ -301,7 +403,16 @@ export default function ProfilePage() {
               <ListItemText primary="Email" secondary={userProfile.email} />
             </ListItem>
             <ListItem>
-              <ListItemText primary="Date Joined">{userProfile.date_joined}</ListItemText>
+            <ListItemText primary="Phone" secondary={userProfile.phone} />
+            </ListItem>
+            <ListItem>
+            <ListItemText primary="Address" secondary={userProfile.address} />
+            </ListItem>
+            <ListItem>
+            <ListItemText primary="Date joined" secondary={userProfile.date_joined} />
+            </ListItem>
+            <ListItem>
+            <ListItemText primary="Subscription" secondary={userProfile.subscription_id} />
             </ListItem>
           </List>
         </Paper>
@@ -580,6 +691,76 @@ export default function ProfilePage() {
       );
     }
 
+    if (selectedMenu === 'Subscription') {
+      return (
+        <Box sx={{ display: 'flex', marginTop: '-5rem' }}>
+          <Box
+            component="main"
+            sx={{
+              flexGrow: 1,
+              p: 1.5,
+              width: { sm: `calc(100% - ${drawerWidth}px)` },
+              marginLeft: { sm: `${drawerWidth}px` },
+            }}
+          >
+            <Typography variant="h5" gutterBottom>
+              Your Subscription
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                {subscription ? (
+                  <Card>
+                    <CardContent>
+                      <Typography variant="h6">Current Subscription</Typography>
+                      <Typography>Description: {subscription.description}</Typography>
+                      <Typography>Commission Fee: {subscription.commission_fee}%</Typography>
+                      <Typography>Deposit Fee: {subscription.deposit_fee}%</Typography>
+                      <Typography>Price: ${subscription.price}</Typography>
+                      <Typography>
+                        Subscription Start: {userProfile?.subscription_start ? userProfile.subscription_start.toDateString() : 'N/A'}
+                      </Typography>
+                      <Typography>
+                        Subscription End: {userProfile?.subscription_end ? userProfile.subscription_end.toDateString() : 'N/A'}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Typography>No subscription found</Typography>
+                )}
+              </Grid>
+            </Grid>
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="subscription-label">Change Subscription</InputLabel>
+              <Select
+                labelId="subscription-label"
+                value={selectedSubscription?.type || ''}
+                onChange={handleSubscriptionChange}
+              >
+                {availableSubscriptions.map((subscription) => (
+                  <MenuItem
+                    key={subscription.type}
+                    value={subscription.type}
+                    disabled={subscription.type === userProfile?.subscription_id} // Disable current subscription
+                  >
+                    {subscription.description} - ${subscription.price}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+    
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={addSubscriptionToBasket} // Add selected subscription to the basket
+              sx={{ marginTop: '20px' }}
+            >
+              Add to Basket
+            </Button>
+          </Box>
+        </Box>
+      );
+    }
+
     // Add other menu options similarly if needed
   };
 
@@ -608,7 +789,12 @@ export default function ProfilePage() {
           <Typography variant="h6" component={Link} to="/" sx={{ color: 'white', '&:hover': { color: 'white' } }}>
             Fastclick Firestore
           </Typography>
-
+          <div>
+          <IconButton component={Link} to="/basket" color="inherit">
+            <Badge badgeContent={itemCount} color="error">
+              <ShoppingBasketIcon />
+            </Badge>
+          </IconButton>
           <AccountCircleIcon component={Link} to="profile/" />
           <IconButton color="inherit" onClick={handleMenuClick}>
             <MenuIcon />
@@ -616,7 +802,7 @@ export default function ProfilePage() {
           <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
             <MenuItem component={Link} to="/" onClick={handleMenuClose} sx={{ color: 'black' }}>Home</MenuItem>
             {currentUser && (
-              <MenuItem component={Link} to="/profile" onClick={handleMenuClose} sx={{ color: 'black' }}>Profile</MenuItem>
+              <MenuItem component={Link} to="/profile" onClick={handleMenuClose} sx={{ color: 'black' }}>Account Dashboard</MenuItem>
             )}
             {!currentUser && (
               <MenuItem component={Link} to="/login" onClick={handleMenuClose} sx={{ color: 'black' }}>Login</MenuItem>
@@ -628,6 +814,7 @@ export default function ProfilePage() {
               <MenuItem component={Link} to="/" onClick={handleLogout} sx={{ color: 'black' }}>Logout</MenuItem>
             )}
           </Menu>
+          </div>
         </Toolbar>
       </AppBar>
 

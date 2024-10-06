@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { query, where, getDocs, collection, doc, getDoc } from 'firebase/firestore';
+import { query, where, getDocs, collection, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { useParams } from 'react-router-dom';
 import { Grid, Card, CardContent, Typography, CircularProgress, Container, Button } from '@mui/material';
 import { database } from '../config/firebase';
 import { toast } from 'react-toastify';
 import { useBasket } from '../context/BasketContext'; // Import useBasket hook
+import useAuth from "../hooks/useAuth";
 
 interface GameDetails {
   id: string;
@@ -36,6 +37,8 @@ export default function GameDetailsPage() {
   const [sellers, setSellers] = useState<{ [key: string]: SellerProfile }>({});
   const [loading, setLoading] = useState<boolean>(true);
   const { addItemToBasket } = useBasket(); // Access addItemToBasket from context
+
+  const currentUser = useAuth();
 
   const gameDetailsCollectionRef = collection(database, 'GameDetails');
   const gameViewCollectionRef = collection(database, 'GameView');
@@ -98,14 +101,25 @@ export default function GameDetailsPage() {
     fetchGameDetails();
   }, [gameName]);
 
-  const handleAddToBasket = (game: GameDetails) => {
-    addItemToBasket({
-      id: game.id,
-      name: game.name,
-      price: game.price,
-      quantity: 1,
-    });
-    toast.success(`${game.name} added to basket!`);
+  const handleAddToBasket = async (game: GameDetails) => {
+    if (!currentUser?.email) {
+      toast.error('Please log in to add items to the basket.');
+      return;
+    }
+  
+    try {
+      // Use the context's addItemToBasket function
+      await addItemToBasket({
+        id: game.id,
+        name: game.name,
+        price: game.price,
+      });
+  
+      toast.success(`${game.name} added to basket!`);
+    } catch (error) {
+      console.error('Error adding item to basket:', error);
+      toast.error('Failed to add item to basket');
+    }
   };
 
   if (loading) {
