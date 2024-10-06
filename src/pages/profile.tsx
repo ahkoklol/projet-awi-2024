@@ -1,17 +1,16 @@
 import { useEffect, useState } from 'react';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { query, where, getDocs, collection, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
+import { query, where, getDocs, collection, addDoc } from 'firebase/firestore';
 import { Container, Typography, List, SelectChangeEvent, ListItem, Grid, FormControl, InputLabel, Select, Stack, Card, TextField, CardContent, Button, AppBar, ListItemButton, ListItemIcon, ListItemText, Paper, CircularProgress, Box, CssBaseline, Toolbar, Divider, Drawer, IconButton, Menu, MenuItem } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { Link } from 'react-router-dom';
-import { auth, database, storage } from '../config/firebase';
+import { auth, database } from '../config/firebase';
 import { signOut } from 'firebase/auth';
 import useAuth from "../hooks/useAuth";
 import { toast } from "react-toastify";
-import { ref, uploadBytes } from 'firebase/storage';
 
 const drawerWidth = 240;
 
@@ -37,15 +36,7 @@ interface GameDetails {
   deposit_fee: number;
 }
 
-interface GameView {
-  name: string;
-  description: string;
-  publisher: string;
-  release_date: number;
-}
-
 export default function ProfilePage() {
-  const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(true); // For loading state
   const [mobileOpen, setMobileOpen] = useState(false); // For toggling drawer
@@ -74,7 +65,6 @@ export default function ProfilePage() {
     // Listen for authentication state changes
     const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
       if (authUser) {
-        setUser(authUser);
         try {
           // Query Firestore for the user document based on email
           const usersRef = collection(database, 'Users');
@@ -96,7 +86,6 @@ export default function ProfilePage() {
         }
       } else {
         console.log('User is signed out.');
-        setUser(null);
         setUserProfile(null);
         setLoading(false);
       }
