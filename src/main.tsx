@@ -9,6 +9,7 @@ import ProfilePage from './pages/profile.tsx'
 import GameViewPage from './pages/games.tsx'
 import GameDetailsPage from './pages/gameDetails.tsx'
 import BasketPage from './pages/basket.tsx'
+import Checkout from './pages/checkout.tsx'
 
 const router = createBrowserRouter(createRoutesFromElements(
 
@@ -19,6 +20,7 @@ const router = createBrowserRouter(createRoutesFromElements(
     <Route path="allgames" element={<GameViewPage />} />
     <Route path="game/:gameName" element={<GameDetailsPage />} />
     <Route path="basket" element={<BasketPage />} />
+    <Route path="checkout" element={<Checkout />} />
   </Route>
 
 ));

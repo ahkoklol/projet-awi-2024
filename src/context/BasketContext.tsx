@@ -13,6 +13,7 @@ interface BasketContextType {
   basketItems: BasketItem[];
   addItemToBasket: (item: BasketItem) => Promise<void>;
   itemCount: number; // To track the number of items in the basket
+  total: number;
 }
 
 const BasketContext = createContext<BasketContextType | undefined>(undefined);
@@ -27,7 +28,8 @@ export const useBasket = () => {
 
 export const BasketProvider = ({ children }: { children: ReactNode }) => {
   const [basketItems, setBasketItems] = useState<BasketItem[]>([]);
-  const [itemCount, setItemCount] = useState<number>(0); // Track the item count
+  const [itemCount, setItemCount] = useState<number>(0);
+  const [total, setTotal] = useState<number>(0)
   const currentUser = useAuth();
 
   // Function to add items to basket and update Firestore
@@ -44,6 +46,7 @@ export const BasketProvider = ({ children }: { children: ReactNode }) => {
 
       let updatedItems: BasketItem[] = [];
       let newItemCount = 1;
+      let updatedTotal = item.price;
 
       if (cartDoc.exists()) {
         const cartData = cartDoc.data();
@@ -61,12 +64,13 @@ export const BasketProvider = ({ children }: { children: ReactNode }) => {
         }
 
         updatedItems = existingItems;
+        updatedTotal = cartData.total + item.price;
 
         // Update the cart in Firestore
         await updateDoc(cartDocRef, {
           items: updatedItems,
           item_count: newItemCount,
-          total: updatedItems.reduce((total: number, basketItem: BasketItem) => total + basketItem.price, 0),
+          total: updatedTotal,
         });
       } else {
         // If the cart doesn't exist, create a new one
@@ -81,7 +85,8 @@ export const BasketProvider = ({ children }: { children: ReactNode }) => {
 
       // Update local basket state and item count
       setBasketItems(updatedItems);
-      setItemCount(newItemCount); // Update the item count locally
+      setItemCount(newItemCount);
+      setTotal(updatedTotal);
     } catch (error) {
       console.error('Error adding item to basket:', error);
     }
@@ -101,10 +106,12 @@ export const BasketProvider = ({ children }: { children: ReactNode }) => {
           const cartData = cartDoc.data();
           const existingItems = cartData.items || [];
           const itemCount = cartData.item_count || 0;
+          const totalPrice = cartData.total || 0;
 
           // Update local state with items and count from Firestore
           setBasketItems(existingItems);
           setItemCount(itemCount);
+          setTotal(totalPrice);
         }
       } catch (error) {
         console.error('Error fetching basket from Firestore:', error);
@@ -115,7 +122,7 @@ export const BasketProvider = ({ children }: { children: ReactNode }) => {
   }, [currentUser]);
 
   return (
-    <BasketContext.Provider value={{ basketItems, addItemToBasket, itemCount }}>
+    <BasketContext.Provider value={{ basketItems, addItemToBasket, itemCount, total }}>
       {children}
     </BasketContext.Provider>
   );

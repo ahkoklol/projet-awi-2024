@@ -4,6 +4,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { database } from '../config/firebase';
 import useAuth from '../hooks/useAuth';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 interface BasketItem {
   id: string;
@@ -22,7 +23,8 @@ interface CartData {
 export default function BasketPage() {
   const [cartData, setCartData] = useState<CartData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const currentUser = useAuth(); // Get the currently authenticated user
+  const currentUser = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCartData = async () => {
@@ -80,7 +82,7 @@ export default function BasketPage() {
             <Typography variant="h5" sx={{ marginTop: '20px', color: 'black' }}>
               Total: ${cartData.total}
             </Typography>
-            <Button variant="contained" color="primary" sx={{ marginTop: '20px' }}>
+            <Button variant="contained" color="primary" sx={{ marginTop: '20px' }} onClick={() => navigate(`/checkout`)}>
               Proceed to Checkout
             </Button>
           </Grid>
