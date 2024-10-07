@@ -5,8 +5,8 @@ import useUserProfile from '../hooks/useUserProfile';
 import { useNavigate } from 'react-router-dom';
 
 export default function Checkout() {
-  const { basketItems, total, itemCount } = useBasket(); // Get basket data from context
-  const { userProfile, loading } = useUserProfile(); // Get user profile data from custom hook
+  const { basketItems, total, itemCount, clearBasket } = useBasket();
+  const { userProfile, loading } = useUserProfile();
   const navigate = useNavigate();
 
   // State for form fields
@@ -19,7 +19,6 @@ export default function Checkout() {
   const [postalCode, setPostalCode] = useState('');
   const [country, setCountry] = useState('');
 
-  // State for form validation errors
   const [error, setError] = useState('');
 
   // Update form fields when userProfile is loaded
@@ -43,12 +42,12 @@ export default function Checkout() {
       return;
     }
     setError(''); // Clear error if everything is filled
+    clearBasket();
     navigate(`/home`);
   };
 
   return (
-    <Grid container sx={{ marginTop: '40px' }} spacing={2}>
-      {/* Order Review on Top */}
+    <Grid container sx={{ marginTop: '40px', marginBottom: '-20px' }} spacing={2}>
       <Grid item xs={12}>
         <Typography variant="h3" gutterBottom sx={{ color: 'black' }}>
           Order Summary and Delivery Address
@@ -75,7 +74,7 @@ export default function Checkout() {
           </Container>
         ) : (
           <>
-          <Typography variant="h5" gutterBottom sx={{ color: 'black' }}>
+          <Typography variant="h5" gutterBottom sx={{ color: 'black', marginTop: '40px' }}>
             Order review - {itemCount} items
           </Typography>
             <List disablePadding>
@@ -200,15 +199,13 @@ export default function Checkout() {
           </Grid>
         )}
 
-        {/* Error message */}
         {error && (
           <Typography color="error" sx={{ marginTop: '10px' }}>
             {error}
           </Typography>
         )}
 
-        {/* Proceed to Checkout Button */}
-        <Button variant="contained" color="primary" sx={{ marginTop: '20px' }} onClick={handleCheckout}>
+        <Button variant="contained" color="primary" sx={{ marginTop: '30px' }} onClick={handleCheckout}>
           Proceed to Checkout
         </Button>
       </Grid>

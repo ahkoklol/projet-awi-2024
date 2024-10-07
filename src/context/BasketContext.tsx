@@ -12,6 +12,7 @@ interface BasketItem {
 interface BasketContextType {
   basketItems: BasketItem[];
   addItemToBasket: (item: BasketItem) => Promise<void>;
+  clearBasket: () => Promise<void>; // Added clearBasket here
   itemCount: number; // To track the number of items in the basket
   total: number;
 }
@@ -29,7 +30,7 @@ export const useBasket = () => {
 export const BasketProvider = ({ children }: { children: ReactNode }) => {
   const [basketItems, setBasketItems] = useState<BasketItem[]>([]);
   const [itemCount, setItemCount] = useState<number>(0);
-  const [total, setTotal] = useState<number>(0)
+  const [total, setTotal] = useState<number>(0);
   const currentUser = useAuth();
 
   // Function to add items to basket and update Firestore
@@ -92,6 +93,33 @@ export const BasketProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Function to clear the basket
+  const clearBasket = async () => {
+    if (!currentUser?.email) {
+      console.error('User is not authenticated.');
+      return;
+    }
+
+    try {
+      const buyerId = currentUser.email; // Use the user's email as the buyer ID
+      const cartDocRef = doc(database, 'ShoppingCart', buyerId);
+
+      // Update Firestore to clear the cart
+      await updateDoc(cartDocRef, {
+        items: [],
+        item_count: 0,
+        total: 0,
+      });
+
+      // Clear local state
+      setBasketItems([]);
+      setItemCount(0);
+      setTotal(0);
+    } catch (error) {
+      console.error('Error clearing basket:', error);
+    }
+  };
+
   // useEffect to sync the basket count from Firestore when the user is logged in
   useEffect(() => {
     const fetchBasketCount = async () => {
@@ -122,7 +150,7 @@ export const BasketProvider = ({ children }: { children: ReactNode }) => {
   }, [currentUser]);
 
   return (
-    <BasketContext.Provider value={{ basketItems, addItemToBasket, itemCount, total }}>
+    <BasketContext.Provider value={{ basketItems, addItemToBasket, clearBasket, itemCount, total }}>
       {children}
     </BasketContext.Provider>
   );
