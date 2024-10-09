@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { query, where, getDocs, collection, addDoc } from 'firebase/firestore';
-import { Container, Typography, List, Badge, SelectChangeEvent, ListItem, Grid, FormControl, InputLabel, Select, Stack, Card, TextField, CardContent, Button, AppBar, ListItemButton, ListItemIcon, ListItemText, Paper, CircularProgress, Box, CssBaseline, Toolbar, Divider, Drawer, IconButton, Menu, MenuItem } from '@mui/material';
+import { Container, Typography, List, SelectChangeEvent, ListItem, Grid, FormControl, InputLabel, Select, Stack, Card, TextField, CardContent, Button, AppBar, ListItemButton, ListItemIcon, ListItemText, Paper, CircularProgress, Box, CssBaseline, Toolbar, Divider, Drawer, IconButton, Menu, MenuItem } from '@mui/material';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import { Link } from 'react-router-dom';
 import { auth, database } from '../config/firebase';
 import useAuth from "../hooks/useAuth";
 import { toast } from "react-toastify";
@@ -35,14 +34,6 @@ interface GameDetails {
   seller_id: string;
   discount: number;
   deposit_fee: number;
-}
-
-interface Subscription {
-  description: string;
-  commission_fee: number;
-  deposit_fee: number;
-  price: number;
-  type: string;
 }
 
 export default function ProfilePage() {
