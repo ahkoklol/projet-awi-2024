@@ -17,7 +17,7 @@ export default function Checkout() {
 
   const [error, setError] = useState('');
 
-  // Function to create a transaction for each item in the basket
+  // Function to create transactions and generate a receipt
   const handleCheckout = async () => {
     if (!firstName || !lastName || !phone || !email) {
       setError('Please fill in all the required fields.');
@@ -29,6 +29,7 @@ export default function Checkout() {
     try {
       // Create a transaction for each item in the basket
       const transactionCollectionRef = collection(database, 'Transaction');
+      const receiptItems = []; // Array to store purchased items for the receipt
 
       for (const item of basketItems) {
         // Fetch the game details to get the seller_id
@@ -49,12 +50,29 @@ export default function Checkout() {
           commission_percentage: 0, // Assuming this is fixed for now
           deposit_fee: 0, // Assuming this is fixed for now
           item_id: item.id, // Link the item to the transaction
-          purchase: 'completed', // Assuming purchase status
           sale_date: new Date(), // Current date as sale date
           sale_price: item.price, // Item price
           seller_id: seller_id, // Link the seller to the transaction
         });
+
+        // Add the item (id, name, and price) to the receipt
+        receiptItems.push({
+          id: item.id,         // Add the item's id to the receipt
+          name: item.name,      // Add the item's name to the receipt
+          price: item.price.toFixed(2), // Add the item's price to the receipt
+        });
       }
+
+      // Create the receipt document
+      const receiptCollectionRef = collection(database, 'Receipt');
+      await addDoc(receiptCollectionRef, {
+        email: email,
+        firstname: firstName,
+        lastname: lastName,
+        items_purchased: receiptItems, // Include each item's id, name, and price
+        total: total.toFixed(2), // Total price for the purchase
+        sale_date: new Date(), // Current date as sale date
+      });
 
       // Clear the basket after successful transactions
       clearBasket();
@@ -63,10 +81,11 @@ export default function Checkout() {
       navigate(`/home`);
 
     } catch (error) {
-      console.error('Error creating transactions:', error);
+      console.error('Error creating transactions and receipt:', error);
       setError('Failed to complete the transaction. Please try again.');
     }
   };
+
 
   return (
     <Grid container sx={{ marginTop: '40px', marginBottom: '-20px' }} spacing={2}>
