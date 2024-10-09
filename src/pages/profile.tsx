@@ -2,17 +2,14 @@ import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { query, where, getDocs, collection, addDoc } from 'firebase/firestore';
 import { Container, Typography, List, Badge, SelectChangeEvent, ListItem, Grid, FormControl, InputLabel, Select, Stack, Card, TextField, CardContent, Button, AppBar, ListItemButton, ListItemIcon, ListItemText, Paper, CircularProgress, Box, CssBaseline, Toolbar, Divider, Drawer, IconButton, Menu, MenuItem } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import ShoppingBasketIcon from '@mui/icons-material/ShoppingBasket';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { Link } from 'react-router-dom';
 import { auth, database } from '../config/firebase';
-import { signOut } from 'firebase/auth';
 import useAuth from "../hooks/useAuth";
 import { toast } from "react-toastify";
-import { useBasket } from '../context/BasketContext';
+import AppBarComponent from '../components/adminAppBar';
 
 const drawerWidth = 240;
 
@@ -52,7 +49,6 @@ export default function ProfilePage() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(true); // For loading state
   const [mobileOpen, setMobileOpen] = useState(false); // For toggling drawer
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null); // For the menu in AppBar
   const [selectedMenu, setSelectedMenu] = useState('Edit Profile'); // For tracking selected menu item
   const [newGamePrice, setNewGamePrice] = useState(0);
   const [sellerId, setSellerId] = useState('');
@@ -65,10 +61,6 @@ export default function ProfilePage() {
   const [newGameViewPublisher, setNewGameViewPublisher] = useState('');
   const [newGameViewReleaseDate, setNewGameViewReleaseDate] = useState(0);
   const [userGames, setUserGames] = useState<GameDetails[]>([]);
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
-  const [availableSubscriptions, setAvailableSubscriptions] = useState<Subscription[]>([]);
-  const [selectedSubscription, setSelectedSubscription] = useState<Subscription | null>(null);
-  const { addItemToBasket, itemCount } = useBasket();
   // const [newGameViewStockStatus, setNewGameViewStockStatus] = useState(''); link to all matches to name count
   // const [depositFee, setDepositFee] = useState(0); link to subscription
 
@@ -90,13 +82,8 @@ export default function ProfilePage() {
           if (!querySnapshot.empty) {
             const userDoc = querySnapshot.docs[0]; // Assume unique email
             const data = userDoc.data() as UserProfile;
-            // If subscription_start and subscription_end are Firestore Timestamps, convert them to Date objects
-            const subscriptionStart = data.subscription_start ? (data.subscription_start as any).toDate() : null;
-            const subscriptionEnd = data.subscription_end ? (data.subscription_end as any).toDate() : null;
             setUserProfile({
               ...data,
-              subscription_start: subscriptionStart,
-              subscription_end: subscriptionEnd,
             });
             setSellerId(userDoc.id);
           } else {
@@ -124,77 +111,6 @@ export default function ProfilePage() {
     }
   }, [selectedMenu, sellerId]);
 
-  useEffect(() => {
-    // GET request to fetch the user's subscription
-    const fetchSubscription = async (subscriptionId: string) => {
-      try {
-        // Query the Subscription collection where type matches subscriptionId
-        const subscriptionsRef = collection(database, 'Subscription');
-        const q = query(subscriptionsRef, where('type', '==', subscriptionId));
-        const querySnapshot = await getDocs(q);
-  
-        if (!querySnapshot.empty) {
-          const subscriptionData = querySnapshot.docs[0].data() as Subscription;
-          setSubscription(subscriptionData);
-        } else {
-          console.log('No subscription found');
-        }
-      } catch (error) {
-        console.error('Error fetching subscription:', error);
-      }
-    };
-  
-    if (userProfile?.subscription_id) {
-      fetchSubscription(userProfile.subscription_id);
-    }
-  }, [userProfile?.subscription_id]);
-
-  useEffect(() => {
-    // GET request to fetch all available subscriptions
-    const fetchAvailableSubscriptions = async () => {
-      try {
-        const subscriptionCollectionRef = collection(database, 'Subscription');
-        const subscriptionSnapshot = await getDocs(subscriptionCollectionRef);
-        const subscriptionList: Subscription[] = subscriptionSnapshot.docs.map(doc => doc.data() as Subscription);
-        setAvailableSubscriptions(subscriptionList);
-      } catch (error) {
-        console.error('Error fetching available subscriptions:', error);
-      }
-    };
-  
-    fetchAvailableSubscriptions();
-  }, []);
-  
-  const handleSubscriptionChange = (event: SelectChangeEvent<string>) => {
-    const selectedSubscriptionId = event.target.value;
-    const foundSubscription = availableSubscriptions.find(sub => sub.type === selectedSubscriptionId);
-  
-    if (foundSubscription) {
-      setSelectedSubscription(foundSubscription);
-    }
-  };
-
-  const addSubscriptionToBasket = async () => {
-    if (!selectedSubscription) {
-      toast.error('Please select a subscription.');
-      return;
-    }
-  
-    try {
-      const basketItem = {
-        id: selectedSubscription.type,
-        name: selectedSubscription.description,
-        price: selectedSubscription.price,
-      };
-  
-      await addItemToBasket(basketItem); // Use basket context to add item to the basket
-      toast.success('Subscription added to your basket.');
-    } catch (error) {
-      console.error('Error adding subscription to basket:', error);
-      toast.error('Failed to add subscription to the basket.');
-    }
-  };
-
   const fetchGameNames = async () => {
     try {
       const gameNamesSnapshot = await getDocs(gameViewCollectionRef);
@@ -216,23 +132,6 @@ export default function ProfilePage() {
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
-  };
-
-  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      toast.success('Goodbye!');
-    } catch (error) {
-      console.log('User not signed out', error);
-    }
   };
 
   // POST request to add a new game
@@ -329,16 +228,8 @@ export default function ProfilePage() {
         </ListItem>
 
         {/* Conditional rendering based on user role */}
-        {userProfile?.role === 'seller' && (
+        {userProfile?.role === 'admin' && (
           <>
-            <ListItem disablePadding>
-              <ListItemButton onClick={() => setSelectedMenu('Subscription')}>
-                <ListItemIcon>
-                  <MailIcon />
-                </ListItemIcon>
-                <ListItemText primary="Subscription" />
-              </ListItemButton>
-            </ListItem>
             <ListItem disablePadding>
               <ListItemButton onClick={() => setSelectedMenu('Sales Dashboard')}>
                 <ListItemIcon>
@@ -410,9 +301,6 @@ export default function ProfilePage() {
             </ListItem>
             <ListItem>
             <ListItemText primary="Date joined" secondary={userProfile.date_joined} />
-            </ListItem>
-            <ListItem>
-            <ListItemText primary="Subscription" secondary={userProfile.subscription_id} />
             </ListItem>
           </List>
         </Paper>
@@ -691,76 +579,6 @@ export default function ProfilePage() {
       );
     }
 
-    if (selectedMenu === 'Subscription') {
-      return (
-        <Box sx={{ display: 'flex', marginTop: '-5rem' }}>
-          <Box
-            component="main"
-            sx={{
-              flexGrow: 1,
-              p: 1.5,
-              width: { sm: `calc(100% - ${drawerWidth}px)` },
-              marginLeft: { sm: `${drawerWidth}px` },
-            }}
-          >
-            <Typography variant="h5" gutterBottom>
-              Your Subscription
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                {subscription ? (
-                  <Card>
-                    <CardContent>
-                      <Typography variant="h6">Current Subscription</Typography>
-                      <Typography>Description: {subscription.description}</Typography>
-                      <Typography>Commission Fee: {subscription.commission_fee}%</Typography>
-                      <Typography>Deposit Fee: {subscription.deposit_fee}%</Typography>
-                      <Typography>Price: ${subscription.price}</Typography>
-                      <Typography>
-                        Subscription Start: {userProfile?.subscription_start ? userProfile.subscription_start.toDateString() : 'N/A'}
-                      </Typography>
-                      <Typography>
-                        Subscription End: {userProfile?.subscription_end ? userProfile.subscription_end.toDateString() : 'N/A'}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <Typography>No subscription found</Typography>
-                )}
-              </Grid>
-            </Grid>
-            <FormControl fullWidth margin="normal">
-              <InputLabel id="subscription-label">Change Subscription</InputLabel>
-              <Select
-                labelId="subscription-label"
-                value={selectedSubscription?.type || ''}
-                onChange={handleSubscriptionChange}
-              >
-                {availableSubscriptions.map((subscription) => (
-                  <MenuItem
-                    key={subscription.type}
-                    value={subscription.type}
-                    disabled={subscription.type === userProfile?.subscription_id} // Disable current subscription
-                  >
-                    {subscription.description} - ${subscription.price}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-    
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={addSubscriptionToBasket} // Add selected subscription to the basket
-              sx={{ marginTop: '20px' }}
-            >
-              Add to Basket
-            </Button>
-          </Box>
-        </Box>
-      );
-    }
-
     // Add other menu options similarly if needed
   };
 
@@ -775,28 +593,7 @@ export default function ProfilePage() {
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <AppBar position="fixed" sx={{ backgroundColor: 'rgb(19, 38, 77)', zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-        <Toolbar sx={{ justifyContent: 'space-between' }}>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" sx={{ color: 'white', '&:hover': { color: 'white' } }}>
-            Fastclick Firestore
-          </Typography>
-          <div>
-          <Typography variant="h6" component={Link} to="/" onClick={handleLogout} sx={{ color: 'white', '&:hover': { color: 'white' } }}>
-            Logout
-          </Typography>
-          </div>
-        </Toolbar>
-      </AppBar>
-
+      <AppBarComponent handleDrawerToggle={handleDrawerToggle} />
       <Drawer
         variant="temporary"
         open={mobileOpen}
