@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { query, where, getDocs, collection, addDoc } from 'firebase/firestore';
-import { Container, Typography, List, SelectChangeEvent, ListItem, Grid, FormControl, InputLabel, Select, Stack, Card, TextField, CardContent, Button, AppBar, ListItemButton, ListItemIcon, ListItemText, Paper, CircularProgress, Box, CssBaseline, Toolbar, Divider, Drawer, IconButton, Menu, MenuItem } from '@mui/material';
+import { Container, Typography, List, SelectChangeEvent, ListItem, Grid, FormControl, InputLabel, Select, Stack, Card, TextField, CardContent, Button, ListItemButton, ListItemIcon, ListItemText, Paper, CircularProgress, Box, CssBaseline, Toolbar, Divider, Drawer, MenuItem } from '@mui/material';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { auth, database } from '../config/firebase';
-import useAuth from "../hooks/useAuth";
 import { toast } from "react-toastify";
 import AppBarComponent from '../components/adminAppBar';
 
@@ -52,13 +51,18 @@ export default function ProfilePage() {
   const [newGameViewPublisher, setNewGameViewPublisher] = useState('');
   const [newGameViewReleaseDate, setNewGameViewReleaseDate] = useState(0);
   const [userGames, setUserGames] = useState<GameDetails[]>([]);
+  const [sellerEmail, setSellerEmail] = useState('');
+  const [showAdditionalFields, setShowAdditionalFields] = useState(false);
+  const [sellerFirstname, setSellerFirstname] = useState('');
+  const [sellerLastname, setSellerLastname] = useState('');
+  const [sellerAddress, setSellerAddress] = useState('');
+  const [sellerPhone, setSellerPhone] = useState('');
   // const [newGameViewStockStatus, setNewGameViewStockStatus] = useState(''); link to all matches to name count
   // const [depositFee, setDepositFee] = useState(0); link to subscription
 
   const gameDetailsCollectionRef = collection(database, "GameDetails");
   const gameViewCollectionRef = collection(database, "GameView");
-
-  const currentUser = useAuth();
+  const usersCollectionRef = collection(database, "Users");
 
   useEffect(() => {
     // Listen for authentication state changes
@@ -97,7 +101,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if ((selectedMenu === 'Stock' || selectedMenu === 'Deposit Product') && sellerId) {
-      fetchUserGames(sellerId);
+      fetchAllGames();
       fetchGameNames();
     }
   }, [selectedMenu, sellerId]);
@@ -126,25 +130,85 @@ export default function ProfilePage() {
   };
 
   // POST request to add a new game
-  const onSubmitGame = async () => {
-    if (!selectedGameName) {
-      toast.error('Please select a game name.');
-      return;
+const onSubmitGame = async () => {
+  if (!selectedGameName) {
+    toast.error('Please select a game name.');
+    return;
+  }
+
+  try {
+    // Wait for the result of the email check
+    const emailExists = await handleEmailCheck();
+
+    // If email doesn't exist and additional fields are not filled, don't proceed
+    if (!emailExists && !sellerFirstname && !sellerLastname) {
+      toast.error('Please provide seller details to create a new seller.');
+      return; // Early return if additional fields are not filled
     }
-    try {
-      await addDoc(gameDetailsCollectionRef, { name: selectedGameName, price: newGamePrice,seller_id: sellerId, discount: discount, stock_status: stockStatus });
-      console.log('Game added successfully!');
-      toast.success('Game added successfully!');
-      // reset fields
-      setSelectedGameName('');
-      setNewGamePrice(0);
-      setDiscount(0);
-      setStockStatus('available');
-      fetchUserGames(sellerId); // Refresh the list of games
-    } catch (error) {
-      console.log('Error adding document', error);
+
+    // If the email does not exist, create a new seller before proceeding
+    if (!emailExists && sellerFirstname && sellerLastname) {
+      await addDoc(usersCollectionRef, {
+        email: sellerEmail,
+        firstname: sellerFirstname,
+        lastname: sellerLastname,
+        address: sellerAddress,
+        phone: sellerPhone,
+        role: 'seller',
+      });
+      toast.success('New seller created successfully!');
     }
-  };
+
+    // Proceed to add the game to the GameDetails collection
+    await addDoc(gameDetailsCollectionRef, {
+      name: selectedGameName,
+      price: newGamePrice,
+      seller_id: sellerEmail,  // Use email as seller_id
+      discount: discount,
+      stock_status: stockStatus,
+    });
+
+    toast.success('Game deposited successfully!');
+    resetFormFields(); // Reset form fields after successful submission
+
+  } catch (error) {
+    console.error('Error adding game or creating seller:', error);
+    toast.error('Error adding game or creating seller. Please try again.');
+  }
+};
+
+// Helper function to check if seller email exists in Firestore
+const handleEmailCheck = async (): Promise<boolean> => {
+  try {
+    const q = query(usersCollectionRef, where('email', '==', sellerEmail));
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+      return true;  // Email exists
+    } else {
+      setShowAdditionalFields(true);
+      return false;  // Email does not exist
+    }
+  } catch (error) {
+    toast.error('Error checking seller email. Please try again.');
+    console.error('Error checking email:', error);
+    return false;  // In case of error, treat as email not found
+  }
+};
+
+// Helper function to reset form fields
+const resetFormFields = () => {
+  setShowAdditionalFields(false);
+  setSelectedGameName('');
+  setNewGamePrice(0);
+  setDiscount(0);
+  setSellerEmail('');
+  setSellerFirstname('');
+  setSellerLastname('');
+  setSellerAddress('');
+  setSellerPhone('');
+  setStockStatus('available');
+};
   
   // POST request to create a new game view
   const onSubmitGameView = async () => {
@@ -177,17 +241,16 @@ export default function ProfilePage() {
   };
 
   // GET request to fetch all games deposited by the current user
-  const fetchUserGames = async (sellerId: string) => {
+  const fetchAllGames = async () => {
     try {
-      const gamesQuery = query(gameDetailsCollectionRef, where('seller_id', '==', sellerId));
-      const querySnapshot = await getDocs(gamesQuery);
-      
+      const querySnapshot = await getDocs(gameDetailsCollectionRef);
+
       const gamesList: GameDetails[] = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       })) as GameDetails[];
 
-      setUserGames(gamesList); // Store games in state
+    setUserGames(gamesList);
     } catch (error) {
       console.error('Error fetching games for the user:', error);
     }
@@ -389,7 +452,7 @@ export default function ProfilePage() {
               <Card sx={{ flexGrow: 1, height: 'auto' }}>
                 <CardContent>
                   <Typography gutterBottom variant="h5" component="div">
-                    Add a product
+                    Deposit a product
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary', marginBottom: '1rem' }}>
                     Use the form below to add new game details.
@@ -441,14 +504,56 @@ export default function ProfilePage() {
                       <MenuItem value="no">No</MenuItem>
                     </Select>
                   </FormControl>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={onSubmitGame}
-                    sx={{ marginTop: '20px' }}
-                  >
-                    Add Game
-                  </Button>
+                  <TextField
+                    label="Seller Email"
+                    value={sellerEmail}
+                    onChange={(e) => setSellerEmail(e.target.value)}
+                    type="email"
+                    fullWidth
+                    margin="normal"
+                  />
+                  {/* Additional Fields for new seller */}
+                  {showAdditionalFields && (
+                    <>
+                      <TextField
+                        label="First Name"
+                        value={sellerFirstname}
+                        onChange={(e) => setSellerFirstname(e.target.value)}
+                        fullWidth
+                        margin="normal"
+                      />
+                      <TextField
+                        label="Last Name"
+                        value={sellerLastname}
+                        onChange={(e) => setSellerLastname(e.target.value)}
+                        fullWidth
+                        margin="normal"
+                      />
+                      <TextField
+                        label="Address"
+                        value={sellerAddress}
+                        onChange={(e) => setSellerAddress(e.target.value)}
+                        fullWidth
+                        margin="normal"
+                      />
+                      <TextField
+                        label="Phone"
+                        value={sellerPhone}
+                        onChange={(e) => setSellerPhone(e.target.value)}
+                        type="number"
+                        fullWidth
+                        margin="normal"
+                      />
+                    </>
+                  )}
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={onSubmitGame}
+                      sx={{ marginTop: '20px' }}
+                    >
+                      Add Game
+                    </Button>
                 </CardContent>
               </Card>
             </Stack>
