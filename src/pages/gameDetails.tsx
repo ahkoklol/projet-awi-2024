@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { query, where, getDocs, collection, doc, getDoc } from 'firebase/firestore';
 import { useParams } from 'react-router-dom';
-import { Grid, Card, CardContent, Typography, CircularProgress, Container, Button } from '@mui/material';
+import { Grid, Card, CardContent, Typography, CircularProgress, Container, Button, Box } from '@mui/material';
 import { database } from '../config/firebase';
 import { toast } from 'react-toastify';
-import { useBasket } from '../context/BasketContext'; // Import useBasket hook
+import { useBasket } from '../context/BasketContext';
+import { useNavigate } from 'react-router-dom';
 
 interface GameDetails {
   id: string;
@@ -30,16 +31,17 @@ interface SellerProfile {
 }
 
 export default function GameDetailsPage() {
-  const { gameName } = useParams<{ gameName: string }>(); // Extract game name from the route params
+  const { gameName } = useParams<{ gameName: string }>();
   const [gameView, setGameView] = useState<GameView | null>(null);
   const [gameDetails, setGameDetails] = useState<GameDetails[]>([]);
   const [sellers, setSellers] = useState<{ [key: string]: SellerProfile }>({});
   const [loading, setLoading] = useState<boolean>(true);
-  const { addItemToBasket } = useBasket(); // Access addItemToBasket from context
+  const { addItemToBasket } = useBasket();
+  const navigate = useNavigate();
 
   const gameDetailsCollectionRef = collection(database, 'GameDetails');
   const gameViewCollectionRef = collection(database, 'GameView');
-  const usersCollectionRef = collection(database, 'Users'); // Assuming sellers are in the 'Users' collection
+  const usersCollectionRef = collection(database, 'Users');
 
   useEffect(() => {
     const fetchGameDetails = async () => {
@@ -120,6 +122,10 @@ export default function GameDetailsPage() {
     }
   };  
 
+  const handleBackToAllGames = () => {
+    navigate('/allgames');
+  };
+
   if (loading) {
     return (
       <Container>
@@ -130,7 +136,17 @@ export default function GameDetailsPage() {
 
   return (
     <Container>
-      <Typography variant="h4" gutterBottom sx={{ color: 'black', marginTop: '80px', marginBottom: '20px' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-start', marginTop: '80px' }}>
+        <Button 
+          variant="outlined" 
+          color="primary" 
+          onClick={handleBackToAllGames}
+          sx={{ marginBottom: '20px' }}
+        >
+          Back to All Games
+        </Button>
+      </Box>
+      <Typography variant="h4" gutterBottom sx={{ color: 'black', marginBottom: '20px' }}>
         {gameName}
       </Typography>
       {gameView && (
