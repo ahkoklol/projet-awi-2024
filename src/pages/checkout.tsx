@@ -43,7 +43,7 @@ export default function Checkout() {
     }
     setError(''); // Clear error if everything is filled
     clearBasket();
-    navigate(`/home`);
+    //navigate(`/home`);
   };
 
   return (

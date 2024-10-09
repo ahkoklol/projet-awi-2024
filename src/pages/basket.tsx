@@ -1,64 +1,40 @@
 import { useEffect, useState } from 'react';
-import { Container, Typography, Grid, Card, CardContent, CircularProgress, Button } from '@mui/material';
-import { doc, getDoc } from 'firebase/firestore';
-import { database } from '../config/firebase';
-import useAuth from '../hooks/useAuth';
-import { toast } from 'react-toastify';
+import { Container, Typography, Grid, Card, CardContent, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 interface BasketItem {
   id: string;
   name: string;
   price: number;
-  quantity: number;
-}
-
-interface CartData {
-  buyer_id: string;
-  items: BasketItem[];
-  item_count: number;
-  total: number;
 }
 
 export default function BasketPage() {
-  const [cartData, setCartData] = useState<CartData | null>(null);
+  const [cartData, setCartData] = useState<BasketItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const currentUser = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchCartData = async () => {
-      if (!currentUser?.email) {
-        setLoading(false);
-        return;
+    const fetchCartData = () => {
+      // Fetch basket data from localStorage
+      const savedBasket = localStorage.getItem('basket');
+      if (savedBasket) {
+        const basket = JSON.parse(savedBasket);
+        setCartData(basket.items);
+      } else {
+        toast.error('No items found in your basket.');
       }
-
-      try {
-        const cartDocRef = doc(database, 'ShoppingCart', currentUser.email);
-        const cartDoc = await getDoc(cartDocRef);
-
-        if (cartDoc.exists()) {
-          setCartData(cartDoc.data() as CartData); // Assuming the cart data follows the structure of CartData
-        } else {
-          toast.error('No items found in your basket.');
-        }
-      } catch (error) {
-        console.error('Error fetching basket data:', error);
-        toast.error('Failed to fetch basket.');
-      } finally {
-        setLoading(false);
-      }
+      setLoading(false);
     };
 
     fetchCartData();
-  }, [currentUser]);
+  }, []);
+
+  // Calculate total dynamically
+  const total = cartData.reduce((acc, item) => acc + item.price, 0);
 
   if (loading) {
-    return (
-      <Container>
-        <CircularProgress />
-      </Container>
-    );
+    return <Typography variant="h6">Loading...</Typography>;
   }
 
   return (
@@ -66,9 +42,9 @@ export default function BasketPage() {
       <Typography variant="h4" gutterBottom sx={{ marginBottom: '30px', color: 'black' }}>
         Your Shopping Cart
       </Typography>
-      {cartData && cartData.items.length > 0 ? (
+      {cartData.length > 0 ? (
         <Grid container spacing={2}>
-          {cartData.items.map((item) => (
+          {cartData.map((item) => (
             <Grid item xs={12} key={item.id}> {/* Take full width for each item */}
               <Card sx={{ width: '100%' }}> {/* Make the card take full width */}
                 <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -80,7 +56,7 @@ export default function BasketPage() {
           ))}
           <Grid item xs={12}>
             <Typography variant="h5" sx={{ marginTop: '20px', color: 'black' }}>
-              Total: ${cartData.total}
+              Total: ${total}
             </Typography>
             <Button variant="contained" color="primary" sx={{ marginTop: '20px' }} onClick={() => navigate(`/checkout`)}>
               Proceed to Checkout

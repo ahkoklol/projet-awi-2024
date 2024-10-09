@@ -32,7 +32,7 @@ export default function Login() {
       await signInWithEmailAndPassword(auth, email, password);
       toast.success('Login successful!');
       console.log('Login successful!');
-      navigate('/');
+      navigate('/profile');
     } catch (error: any) {
       switch (error.code) {
         case 'auth/user-not-found':
@@ -70,7 +70,7 @@ export default function Login() {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Log in
+            Administrator Log in
           </Typography>
           <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
             <Grid container spacing={2}>
@@ -124,11 +124,11 @@ export default function Login() {
             <Grid container justifyContent="flex-end">
               <Grid item>
                 <Link
-                  href="/signup"
+                  href="/allgames"
                   variant="body2"
                   sx={{ color: 'red', '&:hover': { color: 'red' } }}
                 >
-                  Don't have an account? Sign up
+                  Not a system administrator? Go to the client page
                 </Link>
               </Grid>
             </Grid>

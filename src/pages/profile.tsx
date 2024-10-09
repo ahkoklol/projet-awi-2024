@@ -786,34 +786,13 @@ export default function ProfilePage() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" component={Link} to="/" sx={{ color: 'white', '&:hover': { color: 'white' } }}>
+          <Typography variant="h6" sx={{ color: 'white', '&:hover': { color: 'white' } }}>
             Fastclick Firestore
           </Typography>
           <div>
-          <IconButton component={Link} to="/basket" color="inherit">
-            <Badge badgeContent={itemCount} color="error">
-              <ShoppingBasketIcon />
-            </Badge>
-          </IconButton>
-          <AccountCircleIcon component={Link} to="profile/" />
-          <IconButton color="inherit" onClick={handleMenuClick}>
-            <MenuIcon />
-          </IconButton>
-          <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-            <MenuItem component={Link} to="/" onClick={handleMenuClose} sx={{ color: 'black' }}>Home</MenuItem>
-            {currentUser && (
-              <MenuItem component={Link} to="/profile" onClick={handleMenuClose} sx={{ color: 'black' }}>Account Dashboard</MenuItem>
-            )}
-            {!currentUser && (
-              <MenuItem component={Link} to="/login" onClick={handleMenuClose} sx={{ color: 'black' }}>Login</MenuItem>
-            )}
-            {!currentUser && (
-              <MenuItem component={Link} to="/signup" onClick={handleMenuClose} sx={{ color: 'black' }}>Signup</MenuItem>
-            )}
-            {currentUser && (
-              <MenuItem component={Link} to="/" onClick={handleLogout} sx={{ color: 'black' }}>Logout</MenuItem>
-            )}
-          </Menu>
+          <Typography variant="h6" component={Link} to="/" onClick={handleLogout} sx={{ color: 'white', '&:hover': { color: 'white' } }}>
+            Logout
+          </Typography>
           </div>
         </Toolbar>
       </AppBar>

@@ -3,18 +3,18 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom'
-import SignUp from './pages/SignUp.tsx'
 import Login from './pages/login.tsx'
 import ProfilePage from './pages/profile.tsx'
 import GameViewPage from './pages/games.tsx'
 import GameDetailsPage from './pages/gameDetails.tsx'
 import BasketPage from './pages/basket.tsx'
 import Checkout from './pages/checkout.tsx'
+import Home from './pages/home.tsx'
 
 const router = createBrowserRouter(createRoutesFromElements(
 
   <Route path="/" element={<App />} >
-    <Route path="signup" element={<SignUp />} />
+    <Route index={true} element={<Home />} />
     <Route path="login" element={<Login />} />
     <Route path="profile" element={<ProfilePage />} />
     <Route path="allgames" element={<GameViewPage />} />

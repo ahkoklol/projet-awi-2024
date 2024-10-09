@@ -10,9 +10,9 @@ import { toast } from "react-toastify";
 import { useBasket } from "../context/BasketContext";
 
 const Navbar: React.FC = () => {
-  const user = useAuth();
+  const user = useAuth();  // Hook to check if user is authenticated
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const { basketItems } = useBasket();
+  const { basketItems } = useBasket();  // To get the count of basket items
 
   const handleClick: React.MouseEventHandler = (event) => {
     setAnchorEl(event.currentTarget as HTMLElement);
@@ -40,25 +40,14 @@ const Navbar: React.FC = () => {
         </Typography>
 
         <div>
-          {user && (
+          {/* if not a user (=client) show the basket */}
+          {!user && (
           <IconButton component={Link} to="/basket" color="inherit">
             <Badge badgeContent={basketItems.length} color="error">
               <ShoppingBasketIcon />
             </Badge>
           </IconButton>
           )}
-
-          <IconButton color="inherit" onClick={handleClick}>
-            <MenuIcon />
-          </IconButton>
-          <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
-            <MenuItem component={Link} to="/" onClick={handleClose} sx={{ color: 'black' }}>Home</MenuItem>
-            {user && (<MenuItem component={Link} to="/profile" onClick={handleClose} sx={{ color: 'black' }}>Account Dashboard</MenuItem>)}
-            {user && (<MenuItem component={Link} to="/allgames" onClick={handleClose} sx={{ color: 'black' }}>Games</MenuItem>)}
-            {!user && (<MenuItem component={Link} to="/login" onClick={handleClose} sx={{ color: 'black' }}>Login</MenuItem>)}
-            {!user && (<MenuItem component={Link} to="/signup" onClick={handleClose} sx={{ color: 'black' }}>Signup</MenuItem>)}
-            {user && (<MenuItem component={Link} to="/" onClick={logout} sx={{ color: 'black' }}>Logout</MenuItem>)}
-          </Menu>
         </div>
       </Toolbar>
     </AppBar>
