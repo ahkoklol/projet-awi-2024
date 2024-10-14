@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { Grid, Card, CardContent, Typography, CircularProgress, Container, Button, Box } from '@mui/material';
 import { database } from '../config/firebase';
 import { toast } from 'react-toastify';
-import { useBasket } from '../context/BasketContext';
+//import { useBasket } from '../context/BasketContext';
 import { useNavigate } from 'react-router-dom';
 
 interface GameDetails {
@@ -38,7 +38,7 @@ export default function GameDetailsPage() {
   const [gameDetails, setGameDetails] = useState<GameDetails[]>([]);
   const [sellers, setSellers] = useState<{ [key: string]: SellerProfile }>({});
   const [loading, setLoading] = useState<boolean>(true);
-  const { addItemToBasket } = useBasket();
+  //const { addItemToBasket } = useBasket();
   const navigate = useNavigate();
 
   const gameDetailsCollectionRef = collection(database, 'GameDetails');
@@ -102,7 +102,7 @@ export default function GameDetailsPage() {
     fetchGameDetails();
   }, [gameName]);
 
-  const handleAddToBasket = (game: GameDetails) => {
+  /* const handleAddToBasket = (game: GameDetails) => {
     try {
       // The addItemToBasket function now returns true if the item was added
       const itemAdded = addItemToBasket({
@@ -126,7 +126,7 @@ export default function GameDetailsPage() {
       console.error('Error adding item to basket:', error);
       toast.error('Failed to add item to basket');
     }
-  };  
+  };  */
 
   const handleBackToAllGames = () => {
     navigate('/allgames');
@@ -192,5 +192,6 @@ export default function GameDetailsPage() {
         ))}
       </Grid>
     </Container>
+    
   );
 }
