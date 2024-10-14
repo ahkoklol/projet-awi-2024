@@ -47,8 +47,9 @@ export default function Checkout() {
         // Create the transaction document
         await addDoc(transactionCollectionRef, {
           buyer_id: email, // Use the email as the buyer_id
-          commission_percentage: 0, // Assuming this is fixed for now
-          deposit_fee: 0, // Assuming this is fixed for now
+          commission_percentage: item.commission, // Assuming this is fixed for now
+          deposit_fee: item.deposit_fee, // Assuming this is fixed for now
+          deposit_fee_type: item.deposit_fee_type, // Assuming this is fixed for now
           item_id: item.id, // Link the item to the transaction
           sale_date: new Date(), // Current date as sale date
           sale_price: item.price, // Item price

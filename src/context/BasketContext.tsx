@@ -4,11 +4,15 @@ interface BasketItem {
   id: string;
   name: string;
   price: number;
+  commission: number;
+  deposit_fee: number;
+  deposit_fee_type: string;
+  quantity: number;
 }
 
 interface BasketContextType {
   basketItems: BasketItem[];
-  addItemToBasket: (item: BasketItem) => boolean;  // <- Returns boolean now
+  addItemToBasket: (item: BasketItem) => boolean;
   clearBasket: () => void;
   itemCount: number;
   total: number;

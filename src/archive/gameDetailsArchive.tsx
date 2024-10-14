@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { Grid, Card, CardContent, Typography, CircularProgress, Container, Button, Box } from '@mui/material';
 import { database } from '../config/firebase';
 import { toast } from 'react-toastify';
+import { useBasket } from '../context/BasketContext';
 import { useNavigate } from 'react-router-dom';
 
 interface GameDetails {
@@ -37,6 +38,7 @@ export default function GameDetailsPage() {
   const [gameDetails, setGameDetails] = useState<GameDetails[]>([]);
   const [sellers, setSellers] = useState<{ [key: string]: SellerProfile }>({});
   const [loading, setLoading] = useState<boolean>(true);
+  const { addItemToBasket } = useBasket();
   const navigate = useNavigate();
 
   const gameDetailsCollectionRef = collection(database, 'GameDetails');
@@ -99,6 +101,32 @@ export default function GameDetailsPage() {
     fetchGameView();
     fetchGameDetails();
   }, [gameName]);
+
+  const handleAddToBasket = (game: GameDetails) => {
+    try {
+      // The addItemToBasket function now returns true if the item was added
+      const itemAdded = addItemToBasket({
+        id: game.id,
+        name: game.name,
+        price: game.price,
+        quantity: game.quantity,
+        commission: game.commission,
+        deposit_fee: game.deposit_fee,
+        deposit_fee_type: game.deposit_fee_type,
+      });
+  
+      if (itemAdded) {
+        // Item was added successfully
+        toast.success(`${game.name} added to basket!`);
+      } else {
+        // Item already exists in the basket
+        toast.error(`${game.name} is already in your basket.`);
+      }
+    } catch (error) {
+      console.error('Error adding item to basket:', error);
+      toast.error('Failed to add item to basket');
+    }
+  };  
 
   const handleBackToAllGames = () => {
     navigate('/allgames');

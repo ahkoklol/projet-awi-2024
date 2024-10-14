@@ -70,8 +70,7 @@ export default function GamesViewPage() {
                 <Button
                   variant="contained"
                   component="span"
-                  color="primary"
-                  sx={{ backgroundColor: 'black', color: 'white', '&:hover': { backgroundColor: 'grey', borderColor: 'grey' } }}
+                  style={{ marginTop: '10px', backgroundColor: 'rgb(0, 186, 240)', color: 'white' }}
                   onClick={() => navigate(`/game/${encodeURIComponent(game.name)}`)}
                 >
                   View Game

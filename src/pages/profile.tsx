@@ -8,6 +8,8 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { auth, database } from '../config/firebase';
 import { toast } from "react-toastify";
 import AppBarComponent from '../components/adminAppBar';
+import Cashier from './cashier';
+import SignUp from './SignUp';
 
 const drawerWidth = 240;
 
@@ -18,10 +20,7 @@ interface UserProfile {
   address: string;
   phone: number;
   role: string;
-  subscription_id: string;
   seller_specific_data: string;
-  subscription_start: Date;
-  subscription_end: Date;
   date_joined: string
 }
 
@@ -29,10 +28,14 @@ interface GameDetails {
   id: string;
   name: string;
   price: number; 
+  quantity: number;
   stock_status: string;
   seller_id: string;
   discount: number;
   deposit_fee: number;
+  deposit_fee_type: string;
+  commission: number;
+  condition: string;
 }
 
 export default function ProfilePage() {
@@ -43,6 +46,11 @@ export default function ProfilePage() {
   const [newGamePrice, setNewGamePrice] = useState(0);
   const [sellerId, setSellerId] = useState('');
   const [discount, setDiscount] = useState(0);
+  const [quantity, setQuantity] = useState(0);
+  const [deposit_fee, setDepositFee] = useState(0);
+  const [deposit_fee_type, setDepositType] = useState('');
+  const [commission, setCommission] = useState(0);
+  const [condition, setCondition] = useState('');
   const [stockStatus, setStockStatus] = useState('available');
   const [gameNames, setGameNames] = useState<string[]>([]);
   const [selectedGameName, setSelectedGameName] = useState('');
@@ -58,7 +66,6 @@ export default function ProfilePage() {
   const [sellerAddress, setSellerAddress] = useState('');
   const [sellerPhone, setSellerPhone] = useState('');
   // const [newGameViewStockStatus, setNewGameViewStockStatus] = useState(''); link to all matches to name count
-  // const [depositFee, setDepositFee] = useState(0); link to subscription
 
   const gameDetailsCollectionRef = collection(database, "GameDetails");
   const gameViewCollectionRef = collection(database, "GameView");
@@ -165,7 +172,12 @@ const onSubmitGame = async () => {
       price: newGamePrice,
       seller_id: sellerEmail,  // Use email as seller_id
       discount: discount,
+      quantity: quantity,
       stock_status: stockStatus,
+      deposit_fee: deposit_fee,
+      deposit_fee_type: deposit_fee_type,
+      commission: commission,
+      condition: condition,
     });
 
     toast.success('Game deposited successfully!');
@@ -202,6 +214,11 @@ const resetFormFields = () => {
   setSelectedGameName('');
   setNewGamePrice(0);
   setDiscount(0);
+  setQuantity(1);
+  setDepositFee(0);
+  setDepositType('');
+  setCommission(0);
+  setCondition('');
   setSellerEmail('');
   setSellerFirstname('');
   setSellerLastname('');
@@ -281,7 +298,20 @@ const resetFormFields = () => {
           </ListItemButton>
         </ListItem>
 
-        {/* Conditional rendering based on user role */}
+        {/* Conditional rendering for cashiers */}
+        {userProfile?.role === 'cashier' && (
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => setSelectedMenu('Cashier')}>
+              <ListItemIcon>
+                <InboxIcon />
+              </ListItemIcon>
+              <ListItemText primary="Cashier" />
+            </ListItemButton>
+          </ListItem>
+        )}
+        
+
+        {/* Conditional rendering for admins */}
         {userProfile?.role === 'admin' && (
           <>
             <ListItem disablePadding>
@@ -324,11 +354,20 @@ const resetFormFields = () => {
                 <ListItemText primary="Create Game" />
               </ListItemButton>
             </ListItem>
+            <ListItem disablePadding>
+            <ListItemButton onClick={() => setSelectedMenu('Create Employee')}>
+              <ListItemIcon>
+                <InboxIcon />
+              </ListItemIcon>
+              <ListItemText primary="Create Employee" />
+            </ListItemButton>
+          </ListItem>
           </>
         )}
       </List>
     </div>
   );
+
 
   const renderContent = () => {
     if (selectedMenu === 'Edit Profile' && userProfile) {
@@ -361,6 +400,16 @@ const resetFormFields = () => {
       );
     }
 
+    if (selectedMenu === 'Cashier') {
+      return (
+        <Box sx={{ display: 'flex', marginTop: '-5rem' }}>
+          <Box component="main" sx={{ flexGrow: 1, p: 1.5, width: { sm: `calc(100% - ${drawerWidth}px)` }, marginLeft: { sm: `${drawerWidth}px` } }}>
+            <Cashier />
+          </Box>
+        </Box>
+      );
+    }
+
     if (selectedMenu === 'Sales Dashboard') {
       return (
         <Box sx={{ display: 'flex', marginTop: '-5rem' }}>
@@ -373,28 +422,29 @@ const resetFormFields = () => {
               marginLeft: { sm: `${drawerWidth}px` }, // Push the content to the right by the width of the drawer
             }}
           >
+            <Typography variant="h5" gutterBottom>
+              Sales Dashboard
+            </Typography>
           <Grid container spacing={2}>
             <Grid item xs={8}>
               <Stack spacing={2} direction="row">
                 <Card sx={{ flexGrow: 1, height: 100 }}>
                   <CardContent>
-                    <Typography gutterBottom variant="h5" component="div">
+                    <Typography gutterBottom variant="h6" component="div">
                       Total Products Sold
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      Lizards are a widespread group of squamate reptiles, with over 6,000
-                      species, ranging across all continents except Antarctica
+                      Products in stock
                     </Typography>
                   </CardContent>
                 </Card>
                 <Card sx={{ flexGrow: 1, height: 100 }}>
                   <CardContent>
-                    <Typography gutterBottom variant="h5" component="div">
-                      Total Earnings
+                    <Typography gutterBottom variant="h6" component="div">
+                      number
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      Lizards are a widespread group of squamate reptiles, with over 6,000
-                      species, ranging across all continents except Antarctica
+                      $$
                     </Typography>
                   </CardContent>
                 </Card>
@@ -405,14 +455,14 @@ const resetFormFields = () => {
               <Card sx={{ flexGrow: 1, height: 42 }}>
                   <CardContent>
                     <Typography gutterBottom variant="h5" component="div">
-                      Lizard
+                      Total commission
                     </Typography>
                   </CardContent>
                 </Card>
                 <Card sx={{ flexGrow: 1, height: 42 }}>
                   <CardContent>
                     <Typography gutterBottom variant="h5" component="div">
-                      Lizard
+                      Total deposit fees
                     </Typography>
                   </CardContent>
                 </Card>
@@ -483,10 +533,48 @@ const resetFormFields = () => {
                     margin="normal"
                   />
                   <TextField
+                    label="Quantity"
+                    value={quantity}
+                    onChange={(e) => setQuantity(parseFloat(e.target.value))}
+                    type="number"
+                    fullWidth
+                    margin="normal"
+                  />
+                  <TextField
                     label="Discount"
                     value={discount}
                     onChange={(e) => setDiscount(parseFloat(e.target.value))}
                     type="number"
+                    fullWidth
+                    margin="normal"
+                  />
+                  <TextField
+                    label="Deposit Fee"
+                    value={deposit_fee}
+                    onChange={(e) => setDepositFee(parseFloat(e.target.value))}
+                    type="number"
+                    fullWidth
+                    margin="normal"
+                  />
+                  <TextField
+                    label="Deposit Type"
+                    value={deposit_fee_type}
+                    onChange={(e) => setDepositType(e.target.value)}
+                    fullWidth
+                    margin="normal"
+                  />
+                  <TextField
+                    label="Commission"
+                    value={commission}
+                    onChange={(e) => setCommission(parseFloat(e.target.value))}
+                    type="number"
+                    fullWidth
+                    margin="normal"
+                  />
+                  <TextField
+                    label="Condition"
+                    value={condition}
+                    onChange={(e) => setCondition(e.target.value)}
                     fullWidth
                     margin="normal"
                   />
@@ -647,12 +735,12 @@ const resetFormFields = () => {
             }}
           >
             <Typography variant="h5" gutterBottom>
-              Your Deposited Games
+              Games in Stock
             </Typography>
             
             {userGames.length === 0 ? (
               <Typography variant="body2" color="textSecondary">
-                No games deposited yet.
+                No games in stock
               </Typography>
             ) : (
               <Grid container spacing={2}>
@@ -670,6 +758,57 @@ const resetFormFields = () => {
                 ))}
               </Grid>
             )}
+          </Box>
+        </Box>
+      );
+    }
+
+    if (selectedMenu === 'Earnings report') {
+      return (
+        <Box sx={{ display: 'flex', marginTop: '-5rem' }}>
+          <Box
+            component="main"
+            sx={{
+              flexGrow: 1,
+              p: 1.5,
+              width: { sm: `calc(100% - ${drawerWidth}px)` },
+              marginLeft: { sm: `${drawerWidth}px` },
+            }}
+          >
+            <Typography variant="h5" gutterBottom>
+              Earnings report
+            </Typography>
+            
+            {userGames.length === 0 ? (
+              <Typography variant="body2" color="textSecondary">
+                No games in stock
+              </Typography>
+            ) : (
+              <Grid container spacing={2}>
+                {userGames.map((game) => (
+                  <Grid item xs={12} sm={6} md={4} key={game.id}>
+                    <Card>
+                      <CardContent>
+                        <Typography variant="h6">{game.name}</Typography>
+                        <Typography variant="body2">Price: ${game.price}</Typography>
+                        <Typography variant="body2">Discount: {game.discount}%</Typography>
+                        <Typography variant="body2">Stock Status: {game.stock_status}</Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            )}
+          </Box>
+        </Box>
+      );
+    }
+
+    if (selectedMenu === 'Create Employee') {
+      return (
+        <Box sx={{ display: 'flex', marginTop: '-5rem' }}>
+          <Box component="main" sx={{ flexGrow: 1, p: 1.5, width: { sm: `calc(100% - ${drawerWidth}px)` }, marginLeft: { sm: `${drawerWidth}px` } }}>
+            <SignUp />
           </Box>
         </Box>
       );

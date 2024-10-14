@@ -3,7 +3,6 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
@@ -16,7 +15,6 @@ import FormLabel from '@mui/material/FormLabel';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useNavigate } from 'react-router-dom';
 import { auth, database } from '../config/firebase'; // Import Firestore and Auth config
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { collection, addDoc } from 'firebase/firestore'; // Firestore functions for adding the user to Firestore
@@ -30,16 +28,9 @@ function SignUp() {
   const [address, setAddress] = useState('');
   const [role, setRole] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-
-    // Validate that a role has been selected
-    if (!role) {
-      toast.error('Please select a role (buyer or seller)');
-      return; // Prevent form submission if no role is selected
-    }
 
     setIsLoading(true);
 
@@ -57,13 +48,11 @@ function SignUp() {
         phone: phone,
         address: address,
         role: role,
-        subscription_id: 'null', // default subscription null = no plan
         seller_specific_data: role === 'seller' ? {} : '', 
       });
 
-      toast.success('User registered successfully!');
-      console.log('User registered successfully:', user);
-      navigate('/'); 
+      toast.success('Cashier registered successfully!');
+      console.log('Cashier registered successfully:', user);
     } catch (error: any) {
       // Handle specific Firebase errors during signup
       switch (error.code) {
@@ -103,7 +92,7 @@ function SignUp() {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Sign up
+            Create Employee Account
           </Typography>
           <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
             <Grid container spacing={2}>
@@ -191,8 +180,8 @@ function SignUp() {
                     onChange={(event) => setRole(event.target.value)}
                     row
                   >
-                    <FormControlLabel value="buyer" control={<Radio />} label="Buyer" />
-                    <FormControlLabel value="Seller" control={<Radio />} label="Seller" />
+                    <FormControlLabel value="admin" control={<Radio />} label="Admin" />
+                    <FormControlLabel value="cashier" control={<Radio />} label="Cashier" />
                   </RadioGroup>
                 </Grid>
 
@@ -212,15 +201,8 @@ function SignUp() {
               }}
               disabled={isLoading}
             >
-              Sign Up
+              Create Account
             </Button>
-            <Grid container justifyContent="flex-end">
-              <Grid item>
-                <Link href="/login" variant="body2" sx={{ color: 'red', '&:hover': { color: 'red' } }}>
-                  Already have an account? Sign in
-                </Link>
-              </Grid>
-            </Grid>
           </Box>
         </Box>
       </Container>

@@ -58,7 +58,7 @@ export default function BasketPage() {
             <Typography variant="h5" sx={{ marginTop: '20px', color: 'black' }}>
               Total: ${total}
             </Typography>
-            <Button variant="contained" color="primary" sx={{ marginTop: '20px' }} onClick={() => navigate(`/checkout`)}>
+            <Button variant="contained" sx={{ marginTop: '20px', backgroundColor: 'rgb(0, 149, 255)' }} onClick={() => navigate(`/checkout`)}>
               Proceed to Checkout
             </Button>
           </Grid>

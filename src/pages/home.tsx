@@ -21,7 +21,7 @@ export default function Home() {
             <Typography variant="h5" component="div">
               Client
             </Typography>
-            <Button variant="contained" color="primary" style={{ marginTop: '10px' }} onClick={handleClickClient}>
+            <Button variant="contained" style={{ marginTop: '10px', backgroundColor: 'rgb(0, 186, 240)', color: 'white' }} onClick={handleClickClient}>
               I am a client
             </Button>
           </CardContent>
@@ -31,10 +31,10 @@ export default function Home() {
         <Card>
           <CardContent>
             <Typography variant="h5" component="div">
-              Admin
+              Employee
             </Typography>
-            <Button variant="contained" color="primary" style={{ marginTop: '10px' }} onClick={handleClickAdmin}>
-              I am a system administrator
+            <Button variant="contained" style={{ marginTop: '10px', backgroundColor: 'rgb(0, 186, 240)', color: 'white' }} onClick={handleClickAdmin}>
+              I am an employee
             </Button>
           </CardContent>
         </Card>
