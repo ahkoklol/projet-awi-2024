@@ -172,7 +172,7 @@ function SignUp() {
 
               {/* Radio Buttons for selecting Role */}
                 <Grid item xs={12} style={{ display: 'flex', alignItems: 'center' }}>
-                  <FormLabel component="legend" style={{ marginRight: '10px' }}>Role</FormLabel>
+                  <FormLabel component="legend" style={{ marginRight: '10px' }}>New employee role</FormLabel>
                   <RadioGroup
                     aria-label="role"
                     name="role"

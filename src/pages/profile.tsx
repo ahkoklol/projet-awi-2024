@@ -8,8 +8,11 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { auth, database } from '../config/firebase';
 import { toast } from "react-toastify";
 import AppBarComponent from '../components/adminAppBar';
-import Cashier from './cashier';
-import SignUp from './SignUp';
+import Cashier from '../components/cashier';
+import SignUp from '../components/SignUp';
+import SalesDashboard from '../components/salesDashboard';
+import CreateGame from '../components/createGame';
+import Stock from '../components/stock';
 
 const drawerWidth = 240;
 
@@ -24,48 +27,26 @@ interface UserProfile {
   date_joined: string
 }
 
-interface GameDetails {
-  id: string;
-  name: string;
-  price: number; 
-  quantity: number;
-  stock_status: string;
-  seller_id: string;
-  discount: number;
-  deposit_fee: number;
-  deposit_fee_type: string;
-  commission: number;
-  condition: string;
-}
-
 export default function ProfilePage() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState<boolean>(true); // For loading state
-  const [mobileOpen, setMobileOpen] = useState(false); // For toggling drawer
-  const [selectedMenu, setSelectedMenu] = useState('Edit Profile'); // For tracking selected menu item
+  const [loading, setLoading] = useState<boolean>(true);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [selectedMenu, setSelectedMenu] = useState('Edit Profile');
   const [newGamePrice, setNewGamePrice] = useState(0);
   const [sellerId, setSellerId] = useState('');
-  const [discount, setDiscount] = useState(0);
   const [quantity, setQuantity] = useState(0);
   const [deposit_fee, setDepositFee] = useState(0);
   const [deposit_fee_type, setDepositType] = useState('');
   const [commission, setCommission] = useState(0);
-  const [condition, setCondition] = useState('');
   const [stockStatus, setStockStatus] = useState('available');
   const [gameNames, setGameNames] = useState<string[]>([]);
   const [selectedGameName, setSelectedGameName] = useState('');
-  const [newGameViewName, setNewGameViewName] = useState('');
-  const [newGameViewDescription, setNewGameViewDescription] = useState('');
-  const [newGameViewPublisher, setNewGameViewPublisher] = useState('');
-  const [newGameViewReleaseDate, setNewGameViewReleaseDate] = useState(0);
-  const [userGames, setUserGames] = useState<GameDetails[]>([]);
   const [sellerEmail, setSellerEmail] = useState('');
   const [showAdditionalFields, setShowAdditionalFields] = useState(false);
   const [sellerFirstname, setSellerFirstname] = useState('');
   const [sellerLastname, setSellerLastname] = useState('');
   const [sellerAddress, setSellerAddress] = useState('');
   const [sellerPhone, setSellerPhone] = useState('');
-  // const [newGameViewStockStatus, setNewGameViewStockStatus] = useState(''); link to all matches to name count
 
   const gameDetailsCollectionRef = collection(database, "GameDetails");
   const gameViewCollectionRef = collection(database, "GameView");
@@ -82,7 +63,7 @@ export default function ProfilePage() {
           const querySnapshot = await getDocs(q);
 
           if (!querySnapshot.empty) {
-            const userDoc = querySnapshot.docs[0]; // Assume unique email
+            const userDoc = querySnapshot.docs[0];
             const data = userDoc.data() as UserProfile;
             setUserProfile({
               ...data,
@@ -108,7 +89,6 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if ((selectedMenu === 'Stock' || selectedMenu === 'Deposit Product') && sellerId) {
-      fetchAllGames();
       fetchGameNames();
     }
   }, [selectedMenu, sellerId]);
@@ -125,11 +105,6 @@ export default function ProfilePage() {
 
   const handleGameNameChange = (event: SelectChangeEvent<string>) => {
     setSelectedGameName(event.target.value);
-  };
-
-  const handleStockChange = (event: SelectChangeEvent) => {
-    const selectedValue = event.target.value as string;
-    setStockStatus(selectedValue === 'yes' ? 'returned' : 'available');
   };
 
   const handleDrawerToggle = () => {
@@ -171,13 +146,11 @@ const onSubmitGame = async () => {
       name: selectedGameName,
       price: newGamePrice,
       seller_id: sellerEmail,  // Use email as seller_id
-      discount: discount,
       quantity: quantity,
       stock_status: stockStatus,
       deposit_fee: deposit_fee,
       deposit_fee_type: deposit_fee_type,
       commission: commission,
-      condition: condition,
     });
 
     toast.success('Game deposited successfully!');
@@ -213,12 +186,10 @@ const resetFormFields = () => {
   setShowAdditionalFields(false);
   setSelectedGameName('');
   setNewGamePrice(0);
-  setDiscount(0);
   setQuantity(1);
   setDepositFee(0);
   setDepositType('');
   setCommission(0);
-  setCondition('');
   setSellerEmail('');
   setSellerFirstname('');
   setSellerLastname('');
@@ -227,52 +198,6 @@ const resetFormFields = () => {
   setStockStatus('available');
 };
   
-  // POST request to create a new game view
-  const onSubmitGameView = async () => {
-    if (!newGameViewName.trim() || !newGameViewDescription.trim() || !newGameViewPublisher.trim() || !newGameViewReleaseDate) {
-      toast.error('All fields are required. Please fill out every field.');
-      return; // Stop further execution if any field is empty
-    }
-    try {
-      // Step 1: Query Firestore to check if a game with the same name already exists
-      const gameViewQuery = query(gameViewCollectionRef, where('name', '==', newGameViewName));
-      const querySnapshot = await getDocs(gameViewQuery);
-
-      if (!querySnapshot.empty) {
-        // Step 2: If a game with the same name is found, show an error message
-        toast.error('This game already exists. You can add products to the existing game.');
-        console.log('This game already exists. You can add products to the existing game.');
-        return; // Stop further execution
-      }
-      await addDoc(gameViewCollectionRef, { name: newGameViewName, publisher: newGameViewPublisher, description: newGameViewDescription, release_date: newGameViewReleaseDate });
-      console.log('Game added successfully!');
-      toast.success('Game added successfully!');
-      // reset fields
-      setNewGameViewName('');
-      setNewGameViewDescription('');
-      setNewGameViewPublisher('');
-      setNewGameViewReleaseDate(0);
-    } catch (error) {
-      console.log('Error adding document', error);
-    }
-  };
-
-  // GET request to fetch all games deposited by the current user
-  const fetchAllGames = async () => {
-    try {
-      const querySnapshot = await getDocs(gameDetailsCollectionRef);
-
-      const gamesList: GameDetails[] = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as GameDetails[];
-
-    setUserGames(gamesList);
-    } catch (error) {
-      console.error('Error fetching games for the user:', error);
-    }
-  };
-
   const drawer = (
     <div>
       <Toolbar style={{ paddingTop: '66px', paddingBottom: '2px' }}>
@@ -298,8 +223,6 @@ const resetFormFields = () => {
           </ListItemButton>
         </ListItem>
 
-        {/* Conditional rendering for cashiers */}
-        {userProfile?.role === 'cashier' && (
           <ListItem disablePadding>
             <ListItemButton onClick={() => setSelectedMenu('Cashier')}>
               <ListItemIcon>
@@ -308,8 +231,22 @@ const resetFormFields = () => {
               <ListItemText primary="Cashier" />
             </ListItemButton>
           </ListItem>
-        )}
-        
+          <ListItem disablePadding>
+              <ListItemButton onClick={() => setSelectedMenu('Stock')}>
+                <ListItemIcon>
+                  <MailIcon />
+                </ListItemIcon>
+                <ListItemText primary="Stock" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => setSelectedMenu('Deposit Product')}>
+                <ListItemIcon>
+                  <MailIcon />
+                </ListItemIcon>
+                <ListItemText primary="Deposit Product" />
+              </ListItemButton>
+            </ListItem>
 
         {/* Conditional rendering for admins */}
         {userProfile?.role === 'admin' && (
@@ -328,22 +265,6 @@ const resetFormFields = () => {
                   <MailIcon />
                 </ListItemIcon>
                 <ListItemText primary="Earnings Report" />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton onClick={() => setSelectedMenu('Stock')}>
-                <ListItemIcon>
-                  <MailIcon />
-                </ListItemIcon>
-                <ListItemText primary="Stock" />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton onClick={() => setSelectedMenu('Deposit Product')}>
-                <ListItemIcon>
-                  <MailIcon />
-                </ListItemIcon>
-                <ListItemText primary="Deposit Product" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -412,75 +333,7 @@ const resetFormFields = () => {
 
     if (selectedMenu === 'Sales Dashboard') {
       return (
-        <Box sx={{ display: 'flex', marginTop: '-5rem' }}>
-          <Box
-            component="main"
-            sx={{
-              flexGrow: 1,
-              p: 1.5,
-              width: { sm: `calc(100% - ${drawerWidth}px)` },
-              marginLeft: { sm: `${drawerWidth}px` }, // Push the content to the right by the width of the drawer
-            }}
-          >
-            <Typography variant="h5" gutterBottom>
-              Sales Dashboard
-            </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={8}>
-              <Stack spacing={2} direction="row">
-                <Card sx={{ flexGrow: 1, height: 100 }}>
-                  <CardContent>
-                    <Typography gutterBottom variant="h6" component="div">
-                      Total Products Sold
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      Products in stock
-                    </Typography>
-                  </CardContent>
-                </Card>
-                <Card sx={{ flexGrow: 1, height: 100 }}>
-                  <CardContent>
-                    <Typography gutterBottom variant="h6" component="div">
-                      number
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      $$
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Stack>
-            </Grid>
-            <Grid item xs={4}>
-              <Stack spacing={2}>
-              <Card sx={{ flexGrow: 1, height: 42 }}>
-                  <CardContent>
-                    <Typography gutterBottom variant="h5" component="div">
-                      Total commission
-                    </Typography>
-                  </CardContent>
-                </Card>
-                <Card sx={{ flexGrow: 1, height: 42 }}>
-                  <CardContent>
-                    <Typography gutterBottom variant="h5" component="div">
-                      Total deposit fees
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Stack>
-            </Grid>
-            <Grid item xs={8}>
-              <Card sx={{ height: 40 + "vh", flexGrow: 1 }}>
-                <CardContent>
-                </CardContent>
-              </Card>
-              <Card sx={{ maxWidth: 345 }}>
-                <CardContent>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-        </Box>
-      </Box>
+        <SalesDashboard/>
       );
     }
 
@@ -541,14 +394,6 @@ const resetFormFields = () => {
                     margin="normal"
                   />
                   <TextField
-                    label="Discount"
-                    value={discount}
-                    onChange={(e) => setDiscount(parseFloat(e.target.value))}
-                    type="number"
-                    fullWidth
-                    margin="normal"
-                  />
-                  <TextField
                     label="Deposit Fee"
                     value={deposit_fee}
                     onChange={(e) => setDepositFee(parseFloat(e.target.value))}
@@ -556,13 +401,19 @@ const resetFormFields = () => {
                     fullWidth
                     margin="normal"
                   />
-                  <TextField
-                    label="Deposit Type"
-                    value={deposit_fee_type}
-                    onChange={(e) => setDepositType(e.target.value)}
-                    fullWidth
-                    margin="normal"
-                  />
+                  <FormControl fullWidth margin="normal">
+                    <InputLabel id="deposit-fee-type-label">Deposit Fee Type</InputLabel>
+                    <Select
+                      labelId="deposit-fee-type-label"
+                      id="deposit-fee-type"
+                      value={deposit_fee_type}
+                      onChange={(e) => setDepositType(e.target.value)}
+                      label="Deposit Fee Type"
+                    >
+                      <MenuItem value="fixed">Fixed</MenuItem>
+                      <MenuItem value="percentage">Percentage</MenuItem>
+                    </Select>
+                  </FormControl>
                   <TextField
                     label="Commission"
                     value={commission}
@@ -571,27 +422,6 @@ const resetFormFields = () => {
                     fullWidth
                     margin="normal"
                   />
-                  <TextField
-                    label="Condition"
-                    value={condition}
-                    onChange={(e) => setCondition(e.target.value)}
-                    fullWidth
-                    margin="normal"
-                  />
-                  <FormControl fullWidth margin="normal">
-                    <InputLabel id="stock-status-label">Returned?</InputLabel>
-                    <Select
-                      labelId="stock-status-label"
-                      id="stock-status"
-                      value={stockStatus === 'returned' ? 'yes' : 'no'}
-                      onChange={handleStockChange}
-                      label="Returned?"  // Ensure the label is tied to the field
-                      sx={{ textAlign: 'left' }}
-                    >
-                      <MenuItem value="yes">Yes</MenuItem>
-                      <MenuItem value="no">No</MenuItem>
-                    </Select>
-                  </FormControl>
                   <TextField
                     label="Seller Email"
                     value={sellerEmail}
@@ -654,159 +484,27 @@ const resetFormFields = () => {
 
     if (selectedMenu === 'Create Game') {
       return (
-        <Box sx={{ display: 'flex', marginTop: '-6rem', marginBottom: '-3rem' }}>
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 1.5,
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          marginLeft: { sm: `${drawerWidth}px` },
-        }}
-      >
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Stack spacing={2} direction="row">
-              <Card sx={{ flexGrow: 1, height: 'auto' }}>
-                <CardContent>
-                  <Typography gutterBottom variant="h5" component="div">
-                    Create a new game
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: 'text.secondary', marginBottom: '1rem' }}>
-                    Use the form below to add new game details.
-                  </Typography>
-                  <TextField
-                    label="Game Name"
-                    value={newGameViewName}
-                    onChange={(e) => setNewGameViewName(e.target.value)}
-                    fullWidth
-                    margin="normal"
-                  />
-                  <TextField
-                    label="Description"
-                    value={newGameViewDescription}
-                    onChange={(e) => setNewGameViewDescription(e.target.value)}
-                    fullWidth
-                    margin="normal"
-                  />
-                  <TextField
-                    label="Publisher"
-                    value={newGameViewPublisher}
-                    onChange={(e) => setNewGameViewPublisher(e.target.value)}
-                    fullWidth
-                    margin="normal"
-                  />
-                  <TextField
-                    label="Release Date"
-                    value={newGameViewReleaseDate}
-                    onChange={(e) => setNewGameViewReleaseDate(parseFloat(e.target.value))}
-                    fullWidth
-                    type="number"
-                    margin="normal"
-                  />
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={onSubmitGameView}
-                    sx={{ marginTop: '20px' }}
-                  >
-                    Add Game
-                  </Button>
-                </CardContent>
-              </Card>
-            </Stack>
-          </Grid>
-        </Grid>
-      </Box>
-    </Box>
+        <CreateGame/>
       );
     }
 
     if (selectedMenu === 'Stock') {
       return (
-        <Box sx={{ display: 'flex', marginTop: '-5rem' }}>
-          <Box
-            component="main"
-            sx={{
-              flexGrow: 1,
-              p: 1.5,
-              width: { sm: `calc(100% - ${drawerWidth}px)` },
-              marginLeft: { sm: `${drawerWidth}px` },
-            }}
-          >
-            <Typography variant="h5" gutterBottom>
-              Games in Stock
-            </Typography>
-            
-            {userGames.length === 0 ? (
-              <Typography variant="body2" color="textSecondary">
-                No games in stock
-              </Typography>
-            ) : (
-              <Grid container spacing={2}>
-                {userGames.map((game) => (
-                  <Grid item xs={12} sm={6} md={4} key={game.id}>
-                    <Card>
-                      <CardContent>
-                        <Typography variant="h6">{game.name}</Typography>
-                        <Typography variant="body2">Price: ${game.price}</Typography>
-                        <Typography variant="body2">Discount: {game.discount}%</Typography>
-                        <Typography variant="body2">Stock Status: {game.stock_status}</Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
-            )}
-          </Box>
-        </Box>
+        <Stock/>
       );
     }
 
     if (selectedMenu === 'Earnings report') {
       return (
-        <Box sx={{ display: 'flex', marginTop: '-5rem' }}>
-          <Box
-            component="main"
-            sx={{
-              flexGrow: 1,
-              p: 1.5,
-              width: { sm: `calc(100% - ${drawerWidth}px)` },
-              marginLeft: { sm: `${drawerWidth}px` },
-            }}
-          >
             <Typography variant="h5" gutterBottom>
               Earnings report
             </Typography>
-            
-            {userGames.length === 0 ? (
-              <Typography variant="body2" color="textSecondary">
-                No games in stock
-              </Typography>
-            ) : (
-              <Grid container spacing={2}>
-                {userGames.map((game) => (
-                  <Grid item xs={12} sm={6} md={4} key={game.id}>
-                    <Card>
-                      <CardContent>
-                        <Typography variant="h6">{game.name}</Typography>
-                        <Typography variant="body2">Price: ${game.price}</Typography>
-                        <Typography variant="body2">Discount: {game.discount}%</Typography>
-                        <Typography variant="body2">Stock Status: {game.stock_status}</Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
-            )}
-          </Box>
-        </Box>
       );
     }
 
     if (selectedMenu === 'Create Employee') {
       return (
-        <Box sx={{ display: 'flex', marginTop: '-5rem' }}>
+        <Box sx={{ display: 'flex', marginTop: '-160px' }}>
           <Box component="main" sx={{ flexGrow: 1, p: 1.5, width: { sm: `calc(100% - ${drawerWidth}px)` }, marginLeft: { sm: `${drawerWidth}px` } }}>
             <SignUp />
           </Box>
