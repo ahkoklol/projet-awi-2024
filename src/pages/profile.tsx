@@ -10,9 +10,10 @@ import { toast } from "react-toastify";
 import AppBarComponent from '../components/adminAppBar';
 import Cashier from '../components/cashier';
 import SignUp from '../components/SignUp';
-import SalesDashboard from '../components/salesDashboard';
+import FinancialStatementFastclick from '../components/financialsFastclick';
 import CreateGame from '../components/createGame';
 import Stock from '../components/stock';
+import FinancialStatementSellers from '../components/financialsSellers';
 
 const drawerWidth = 240;
 
@@ -141,17 +142,19 @@ const onSubmitGame = async () => {
       toast.success('New seller created successfully!');
     }
 
-    // Proceed to add the game to the GameDetails collection
-    await addDoc(gameDetailsCollectionRef, {
-      name: selectedGameName,
-      price: newGamePrice,
-      seller_id: sellerEmail,  // Use email as seller_id
-      quantity: quantity,
-      stock_status: stockStatus,
-      deposit_fee: deposit_fee,
-      deposit_fee_type: deposit_fee_type,
-      commission: commission,
-    });
+    // Add multiple games based on the quantity input
+    for (let i = 0; i < quantity; i++) {
+      await addDoc(gameDetailsCollectionRef, {
+        name: selectedGameName,
+        price: newGamePrice,
+        seller_id: sellerEmail,
+        quantity: 1, 
+        stock_status: stockStatus,
+        deposit_fee: deposit_fee,
+        deposit_fee_type: deposit_fee_type,
+        commission: commission,
+      });
+    }
 
     toast.success('Game deposited successfully!');
     resetFormFields(); // Reset form fields after successful submission
@@ -252,19 +255,19 @@ const resetFormFields = () => {
         {userProfile?.role === 'admin' && (
           <>
             <ListItem disablePadding>
-              <ListItemButton onClick={() => setSelectedMenu('Sales Dashboard')}>
+              <ListItemButton onClick={() => setSelectedMenu('Financials Fastclick')}>
                 <ListItemIcon>
                   <MailIcon />
                 </ListItemIcon>
-                <ListItemText primary="Sales Dashboard" />
+                <ListItemText primary="Financials Fastclick" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
-              <ListItemButton onClick={() => setSelectedMenu('Earnings Report')}>
+              <ListItemButton onClick={() => setSelectedMenu('Financials Sellers')}>
                 <ListItemIcon>
                   <MailIcon />
                 </ListItemIcon>
-                <ListItemText primary="Earnings Report" />
+                <ListItemText primary="Financials Sellers" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -331,9 +334,9 @@ const resetFormFields = () => {
       );
     }
 
-    if (selectedMenu === 'Sales Dashboard') {
+    if (selectedMenu === 'Financials Fastclick') {
       return (
-        <SalesDashboard/>
+        <FinancialStatementFastclick/>
       );
     }
 
@@ -494,11 +497,9 @@ const resetFormFields = () => {
       );
     }
 
-    if (selectedMenu === 'Earnings report') {
+    if (selectedMenu === 'Financials Sellers') {
       return (
-            <Typography variant="h5" gutterBottom>
-              Earnings report
-            </Typography>
+            <FinancialStatementSellers/>
       );
     }
 

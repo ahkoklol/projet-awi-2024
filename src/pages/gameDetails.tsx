@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { query, where, getDocs, collection, doc, getDoc } from 'firebase/firestore';
+import { query, where, getDocs, collection, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { useParams } from 'react-router-dom';
 import { Grid, Card, CardContent, Typography, CircularProgress, Container, Button, Box } from '@mui/material';
 import { database } from '../config/firebase';
@@ -71,8 +71,20 @@ export default function GameDetailsPage() {
         const sellerDataList = await Promise.all(sellerPromises);
         const sellersMap = sellerDataList.reduce((acc, curr) => ({ ...acc, ...curr }), {});  // Merge all objects into one
 
+        // Check if any game has quantity = 0 and update the stock_status
+        const updatedGamesList = await Promise.all(
+          gamesList.map(async (game) => {
+            if (game.quantity === 0 && game.stock_status !== 'soldout') {
+              const gameDocRef = doc(gameDetailsCollectionRef, game.id);
+              await updateDoc(gameDocRef, { stock_status: 'soldout' });
+              return { ...game, stock_status: 'soldout' }; // Update the stock status in the state
+            }
+            return game;
+          })
+        );
+
         setSellers(sellersMap); // Store sellers in state
-        setGameDetails(gamesList); // Store game details in state
+        setGameDetails(updatedGamesList); // Store game details in state
         setLoading(false);
 
       } catch (error) {

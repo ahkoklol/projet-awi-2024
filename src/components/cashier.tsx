@@ -1,7 +1,7 @@
 import { Grid, Typography, Button, List, ListItem, ListItemText, TextField } from '@mui/material';
 import { useState } from 'react';
 import { useBasket } from '../context/BasketContext';
-import { addDoc, collection, doc, getDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { database } from '../config/firebase';
 import { toast } from 'react-toastify';
 
@@ -58,49 +58,60 @@ export default function Cashier() {
 
   // Function to create transactions and generate a receipt
   const handleCheckout = async () => {
-
-    console.log(basketItems);
-
     setError(''); // Clear error if everything is filled
-
+  
     try {
-      // Create a transaction for each item in the basket
       const transactionCollectionRef = collection(database, 'Transaction');
       const receiptItems = []; // Array to store purchased items for the receipt
-
+  
       for (const item of basketItems) {
-        // Fetch the game details to get the seller_id
+        // Fetch the game details to get the current quantity and seller_id
         const gameDetailsRef = doc(database, 'GameDetails', item.id);
         const gameDetailsSnapshot = await getDoc(gameDetailsRef);
-
+  
         if (!gameDetailsSnapshot.exists()) {
           console.error(`Game details not found for item: ${item.name}`);
           continue; // Skip this item if the game details are not found
         }
-
+  
         const gameDetails = gameDetailsSnapshot.data();
         const seller_id = gameDetails?.seller_id || ''; // Get the seller_id from the GameDetails collection
-
-        // Create the transaction document
-        await addDoc(transactionCollectionRef, {
-          buyer_id: email || 'N/A', // Use the email as the buyer_id
-          commission_percentage: item.commission, // Assuming this is fixed for now
-          deposit_fee: item.deposit_fee, // Assuming this is fixed for now
-          deposit_fee_type: item.deposit_fee_type, // Assuming this is fixed for now
-          item_id: item.id, // Link the item to the transaction
-          sale_date: new Date(), // Current date as sale date
-          sale_price: item.price, // Item price
-          seller_id: seller_id, // Link the seller to the transaction
-        });
-
-        // Add the item (id, name, and price) to the receipt
-        receiptItems.push({
-          id: item.id,         // Add the item's id to the receipt
-          name: item.name,      // Add the item's name to the receipt
-          price: item.price.toFixed(2), // Add the item's price to the receipt
-        });
+        const currentQuantity = gameDetails?.quantity || 0; // Get the current quantity
+  
+        // Check if the item has enough stock (in this case, we assume you're only purchasing 1 quantity per item)
+        if (currentQuantity > 0) {
+          // Calculate the new quantity after purchase
+          const newQuantity = currentQuantity - 1;
+  
+          // Update the quantity and stock status in the GameDetails document
+          await updateDoc(gameDetailsRef, {
+            quantity: newQuantity,
+            stock_status: newQuantity === 0 ? 'soldout' : gameDetails.stock_status, // Set to 'soldout' if quantity becomes 0
+          });
+  
+          // Create the transaction document
+          await addDoc(transactionCollectionRef, {
+            buyer_id: email || 'N/A', // Use the email as the buyer_id
+            commission_percentage: item.commission, // Assuming this is fixed for now
+            deposit_fee: item.deposit_fee, // Assuming this is fixed for now
+            deposit_fee_type: item.deposit_fee_type, // Assuming this is fixed for now
+            item_id: item.id, // Link the item to the transaction
+            sale_date: new Date(), // Current date as sale date
+            sale_price: item.price, // Item price
+            seller_id: seller_id, // Link the seller to the transaction
+          });
+  
+          // Add the item (id, name, and price) to the receipt
+          receiptItems.push({
+            id: item.id,         // Add the item's id to the receipt
+            name: item.name,      // Add the item's name to the receipt
+            price: item.price.toFixed(2), // Add the item's price to the receipt
+          });
+        } else {
+          console.error(`Insufficient stock for item: ${item.name}`);
+        }
       }
-
+  
       // Create the receipt document
       const receiptCollectionRef = collection(database, 'Receipt');
       await addDoc(receiptCollectionRef, {
@@ -109,12 +120,12 @@ export default function Cashier() {
         total: total.toFixed(2), // Total price for the purchase
         sale_date: new Date(), // Current date as sale date
       });
-
+  
       // Clear the basket after successful transactions
       clearBasket();
-
+  
       toast.success('Transaction completed successfully!');
-
+  
     } catch (error) {
       console.error('Error creating transactions and receipt:', error);
       setError('Failed to complete the transaction. Please try again.');
