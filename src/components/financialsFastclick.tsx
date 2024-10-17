@@ -84,6 +84,7 @@ const FinancialStatementFastclick: React.FC = () => {
                 await setDoc(doc(database, 'FinancialStatementFastclick', 'fastclickData'), financialStatement, { merge: true });
 
                 setLoading(false); // Set loading to false when data is fetched and posted
+                console.log(financialStatementsSellers);
             } catch (error) {
                 console.error('Error fetching financial statements:', error);
                 setLoading(false);
