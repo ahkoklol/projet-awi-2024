@@ -4,18 +4,24 @@ import { useBasket } from '../context/BasketContext';
 import { addDoc, collection, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { database } from '../config/firebase';
 import { toast } from 'react-toastify';
+import { useSession } from '../context/SessionContext';
 
 export default function Cashier() {
   const { basketItems, total, itemCount, clearBasket, addItemToBasket } = useBasket();
-
-  // State for form fields
   const [email, setEmail] = useState('');
   const [itemId, setItemId] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const { isOpen: isSessionOpen } = useSession();
 
   // Function to handle adding item to the basket
   const handleAddItem = async () => {
+
+    if (!isSessionOpen) {
+      toast.error('No active session. Please open a session to add items to the basket.');
+      return; // Prevent adding item if no session is open
+    }
+
     try {
       const itemRef = doc(database, 'GameDetails', itemId);  // Assuming 'Items' is the collection where items are stored
       const itemSnapshot = await getDoc(itemRef);
@@ -58,6 +64,12 @@ export default function Cashier() {
 
   // Function to create transactions and generate a receipt
   const handleCheckout = async () => {
+
+    if (!isSessionOpen) {
+      toast.error('No active session. Please open a session to proceed to checkout.');
+      return; // Prevent checkout if no session is open
+    }
+
     setError(''); // Clear error if everything is filled
   
     try {
@@ -143,7 +155,7 @@ export default function Cashier() {
 
       <Grid item xs={12}>
         <TextField
-          label="Email (Optional)"
+          label="Customer email (Optional)"
           variant="outlined"
           fullWidth
           size="small"

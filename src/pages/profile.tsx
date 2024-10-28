@@ -7,6 +7,7 @@ import MailIcon from '@mui/icons-material/Mail';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { auth, database } from '../config/firebase';
 import { toast } from "react-toastify";
+import { useSession } from '../context/SessionContext';
 import AppBarComponent from '../components/adminAppBar';
 import Cashier from '../components/cashier';
 import SignUp from '../components/SignUp';
@@ -14,6 +15,7 @@ import FinancialStatementFastclick from '../components/financialsFastclick';
 import CreateGame from '../components/createGame';
 import Stock from '../components/stock';
 import FinancialStatementSellers from '../components/financialsSellers';
+import Sessions from '../components/session';
 
 const drawerWidth = 240;
 
@@ -48,6 +50,8 @@ export default function ProfilePage() {
   const [sellerLastname, setSellerLastname] = useState('');
   const [sellerAddress, setSellerAddress] = useState('');
   const [sellerPhone, setSellerPhone] = useState('');
+
+  const { isOpen: isSessionOpen } = useSession();
 
   const gameDetailsCollectionRef = collection(database, "GameDetails");
   const gameViewCollectionRef = collection(database, "GameView");
@@ -114,6 +118,12 @@ export default function ProfilePage() {
 
   // POST request to add a new game
 const onSubmitGame = async () => {
+
+  if (!isSessionOpen) {
+    toast.error('No active session. Please open a session to deposit a product.');
+    return;
+  }
+
   if (!selectedGameName) {
     toast.error('Please select a game name.');
     return;
@@ -279,13 +289,21 @@ const resetFormFields = () => {
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
-            <ListItemButton onClick={() => setSelectedMenu('Create Employee')}>
-              <ListItemIcon>
-                <InboxIcon />
-              </ListItemIcon>
-              <ListItemText primary="Create Employee" />
-            </ListItemButton>
-          </ListItem>
+              <ListItemButton onClick={() => setSelectedMenu('Create Employee')}>
+                <ListItemIcon>
+                  <InboxIcon />
+                </ListItemIcon>
+                <ListItemText primary="Create Employee" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => setSelectedMenu('Sessions')}>
+                <ListItemIcon>
+                  <InboxIcon />
+                </ListItemIcon>
+                <ListItemText primary="Sessions" />
+              </ListItemButton>
+            </ListItem>
           </>
         )}
       </List>
@@ -510,6 +528,12 @@ const resetFormFields = () => {
             <SignUp />
           </Box>
         </Box>
+      );
+    }
+
+    if (selectedMenu === 'Sessions') {
+      return (
+            <Sessions/>
       );
     }
 
