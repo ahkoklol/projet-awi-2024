@@ -51,16 +51,16 @@ export default function GamesViewPage() {
 
   return (
     <Container>
-      <Typography variant="h4" gutterBottom sx={{ color: 'black', marginTop: '50px', marginBottom: '30px' }}>
+      <Typography variant="h4" gutterBottom sx={{ color: 'black', marginTop: '50px', marginBottom: '10px' }}>
         Available Games
       </Typography>
       <Grid container spacing={3}>
         {games.map((game, index) => (
           <Grid item xs={12} sm={6} md={4} key={index}>
-            <Card>
+            <Card sx={{ height: '200px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <CardContent>
-                <Typography variant="h6">{game.name}</Typography>
-                <Typography variant="body2">{game.description}</Typography>
+                <Typography variant="h6" sx={{ display: '-webkit-box', overflow: 'hidden', WebkitBoxOrient: 'vertical', WebkitLineClamp: 1 }}>{game.name}</Typography>
+                <Typography variant="body2" sx={{ display: '-webkit-box', overflow: 'hidden', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2 }}>{game.description}</Typography>
                 <Typography variant="body2">
                   Publisher: {game.publisher}
                 </Typography>
@@ -70,7 +70,7 @@ export default function GamesViewPage() {
                 <Button
                   variant="contained"
                   component="span"
-                  style={{ marginTop: '10px', backgroundColor: 'rgb(0, 186, 240)', color: 'white' }}
+                  style={{ backgroundColor: 'rgb(0, 186, 240)', color: 'white' }}
                   onClick={() => navigate(`/game/${encodeURIComponent(game.name)}`)}
                 >
                   View Game

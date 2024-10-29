@@ -56,14 +56,14 @@ export default function GameDetailsPage() {
 
         // Fetch sellers based on seller_id
         const sellerPromises = gamesList.map(async (game) => {
-          const sellerDocRef = doc(usersCollectionRef, game.seller_id); // Reference the seller's document by seller_id
-          const sellerDocSnapshot = await getDoc(sellerDocRef);
-
-          if (sellerDocSnapshot.exists()) {
-            const sellerData = sellerDocSnapshot.data() as SellerProfile;
-            return { [game.seller_id]: sellerData };  // Return seller data mapped by seller_id
+          const q = query(usersCollectionRef, where('email', '==', game.seller_id));
+          const querySnapshot = await getDocs(q);
+        
+          if (!querySnapshot.empty) {
+            const sellerData = querySnapshot.docs[0].data() as SellerProfile;
+            return { [game.seller_id]: sellerData };
           } else {
-            // If no seller is found, return an empty object
+            console.log(`Seller with ID ${game.seller_id} does not exist in Users collection.`);
             return {};
           }
         });
@@ -86,7 +86,6 @@ export default function GameDetailsPage() {
         setSellers(sellersMap); // Store sellers in state
         setGameDetails(updatedGamesList); // Store game details in state
         setLoading(false);
-
       } catch (error) {
         toast.error('Failed to fetch game details');
         console.error('Error fetching game details:', error);
