@@ -50,6 +50,7 @@ export default function ProfilePage() {
   const [sellerLastname, setSellerLastname] = useState('');
   const [sellerAddress, setSellerAddress] = useState('');
   const [sellerPhone, setSellerPhone] = useState('');
+  const [stockLocation, setStockLocation] = useState('');
 
   const { isOpen: isSessionOpen } = useSession();
 
@@ -114,6 +115,19 @@ export default function ProfilePage() {
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
+  };
+
+  // Function to handle stock location change
+  const handleStockLocationChange = (event: SelectChangeEvent) => {
+    const location = event.target.value;
+    setStockLocation(location);
+
+    // Set stock status based on location choice
+    if (location === "aisle") {
+      setStockStatus("available");
+    } else if (location === "storage") {
+      setStockStatus("pending");
+    }
   };
 
   // POST request to add a new game
@@ -209,6 +223,7 @@ const resetFormFields = () => {
   setSellerAddress('');
   setSellerPhone('');
   setStockStatus('available');
+  setStockLocation('');
 };
   
   const drawer = (
@@ -430,6 +445,7 @@ const resetFormFields = () => {
                       value={deposit_fee_type}
                       onChange={(e) => setDepositType(e.target.value)}
                       label="Deposit Fee Type"
+                      sx={{ textAlign: 'left' }}
                     >
                       <MenuItem value="fixed">Fixed</MenuItem>
                       <MenuItem value="percentage">Percentage</MenuItem>
@@ -443,6 +459,20 @@ const resetFormFields = () => {
                     fullWidth
                     margin="normal"
                   />
+                  <FormControl fullWidth margin="normal">
+                    <InputLabel id="stock-location-label">Stock Location</InputLabel>
+                    <Select
+                      labelId="stock-location-label"
+                      id="stock-location"
+                      value={stockLocation}
+                      onChange={handleStockLocationChange}
+                      label="Stock Location"
+                      sx={{ textAlign: 'left' }}
+                    >
+                      <MenuItem value="aisle">To the Aisle</MenuItem>
+                      <MenuItem value="storage">To Storage</MenuItem>
+                    </Select>
+                  </FormControl>
                   <TextField
                     label="Seller Email"
                     value={sellerEmail}
