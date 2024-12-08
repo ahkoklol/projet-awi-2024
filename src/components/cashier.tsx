@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import { useSession } from '../context/SessionContext';
 
 export default function Cashier() {
-  const { basketItems, total, itemCount, clearBasket, addItemToBasket } = useBasket();
+  const { basketItems, total, itemCount, clearBasket, addItemToBasket, removeItemFromBasket } = useBasket();
   const [email, setEmail] = useState('');
   const [itemId, setItemId] = useState('');
   const [message, setMessage] = useState('');
@@ -64,6 +64,11 @@ export default function Cashier() {
 
   // Function to create transactions and generate a receipt
   const handleCheckout = async () => {
+
+    if (basketItems.length === 0) {
+      toast.error('Basket cannot be empty');
+      return; // Prevent checkout if the basket is empty
+    }
 
     if (!isSessionOpen) {
       toast.error('No active session. Please open a session to proceed to checkout.');
@@ -189,11 +194,19 @@ export default function Cashier() {
 
         <List disablePadding>
           {basketItems.map((item) => (
-            <ListItem key={item.id} sx={{ py: 1, px: 0 }}>
+            <ListItem key={item.id} sx={{ py: 1, px: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <ListItemText sx={{ mr: 2, color: 'black' }} primary={item.name} />
-              <Typography variant="body1" sx={{ fontWeight: 'medium', color: 'black' }}>
+              <Typography variant="body1" sx={{ fontWeight: 'medium', color: 'black', mr: 2 }}>
                 ${item.price.toFixed(2)}
               </Typography>
+              <Button
+                variant="text"
+                color="secondary"
+                onClick={() => removeItemFromBasket(item.id)}
+                sx={{ fontWeight: 'bold', fontSize: '0.8rem' }}
+              >
+                Remove
+              </Button>
             </ListItem>
           ))}
         </List>

@@ -14,6 +14,7 @@ interface BasketContextType {
   basketItems: BasketItem[];
   addItemToBasket: (item: BasketItem) => boolean;
   clearBasket: () => void;
+  removeItemFromBasket: (itemId: string) => void;
   itemCount: number;
   total: number;
 }
@@ -69,6 +70,16 @@ export const BasketProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Remove item from the basket
+  const removeItemFromBasket = (itemId: string) => {
+    const updatedItems = basketItems.filter((item) => item.id !== itemId);
+    const newItemCount = updatedItems.length;
+  
+    setBasketItems(updatedItems);
+    setItemCount(newItemCount);
+    saveBasketToLocalStorage(updatedItems, newItemCount);
+  };
+
   // Clear the basket and localStorage
   const clearBasket = () => {
     setBasketItems([]);
@@ -85,7 +96,7 @@ export const BasketProvider = ({ children }: { children: ReactNode }) => {
   const total = basketItems.reduce((acc, item) => acc + item.price, 0);
 
   return (
-    <BasketContext.Provider value={{ basketItems, addItemToBasket, clearBasket, itemCount, total }}>
+    <BasketContext.Provider value={{ basketItems, addItemToBasket, clearBasket, itemCount, total, removeItemFromBasket }}>
       {children}
     </BasketContext.Provider>
   );
