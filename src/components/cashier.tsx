@@ -12,7 +12,7 @@ export default function Cashier() {
   const [itemId, setItemId] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const { isOpen: isSessionOpen } = useSession();
+  const { isOpen: isSessionOpen, sessionDocId } = useSession();
 
   // Function to handle adding item to the basket
   const handleAddItem = async () => {
@@ -109,6 +109,7 @@ export default function Cashier() {
           // Create the transaction document
           await addDoc(transactionCollectionRef, {
             buyer_id: email || 'N/A', // Use the email as the buyer_id
+            session_id: sessionDocId, // Link the transaction to the session
             commission_percentage: item.commission, // Assuming this is fixed for now
             deposit_fee: item.deposit_fee, // Assuming this is fixed for now
             deposit_fee_type: item.deposit_fee_type, // Assuming this is fixed for now

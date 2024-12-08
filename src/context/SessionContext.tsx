@@ -14,13 +14,15 @@ interface SessionContextProps {
     loading: boolean;
     endTime: Date | null;
     eventName: string | null;
+    sessionDocId: string | null;
 }
 
 const SessionContext = createContext<SessionContextProps>({
     isOpen: null,
     loading: true,
     endTime: null,
-    eventName: null
+    eventName: null,
+    sessionDocId: null
 });
 
 export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -97,7 +99,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
     };
 
     return (
-        <SessionContext.Provider value={{ isOpen, loading, endTime, eventName }}>
+        <SessionContext.Provider value={{ isOpen, loading, endTime, eventName, sessionDocId }}>
             {children}
         </SessionContext.Provider>
     );
