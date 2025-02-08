@@ -65,6 +65,7 @@ const FinancialStatementFastclick: React.FC = () => {
                 });
 
                 setFinancialStatementsSellers(statements);
+                console.log('Financial statement sellers:', financialStatementsSellers);
 
                 // Calculate Fastclick values for all time
                 const allTimeFinancials = calculateFinancialStatement(statements);

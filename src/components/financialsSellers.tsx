@@ -36,10 +36,14 @@ const FinancialStatementSellers: React.FC = () => {
   const [sessionEventsMap, setSessionEventsMap] = useState<Record<string, string>>({});
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [gameDetailsMap, setGameDetailsMap] = useState<Record<string, GameDetails[]>>({});
-  const [loading, setLoading] = useState<boolean>(true);
   const [financialStatements, setFinancialStatements] = useState<FinancialStatementSellers[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [dataReady, setDataReady] = useState<boolean>(false); // Flag to indicate when data is ready
   const [financialStatementsBySession, setFinancialStatementsBySession] = useState<Record<string, FinancialStatementSellers[]>>({});
+
+  useEffect(() => {
+    console.log('Financial statements:', financialStatements);
+  }, [financialStatements]); // Runs whenever financialStatements changes
 
   useEffect(() => {
     const fetchTransactionsAndGameDetails = async () => {
@@ -77,7 +81,6 @@ const FinancialStatementSellers: React.FC = () => {
         });
 
         setFinancialStatements(financialStatements);
-        
 
         // Fetch game details and group by seller_id
         const gameDetailsRef = collection(database, 'GameDetails');
@@ -246,6 +249,7 @@ const FinancialStatementSellers: React.FC = () => {
     return financialStatements;
   };  
 
+/*
   const calculateFinancials = () => {
     const financialStatements: FinancialStatementSellers[] = [];
 
@@ -297,6 +301,7 @@ const FinancialStatementSellers: React.FC = () => {
 
     return financialStatements;
   };
+  */
 
   const getTotalGamesSold = (sellerId: string) => {
     return groupedTransactions[sellerId]?.length || 0;

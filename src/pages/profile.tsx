@@ -517,7 +517,7 @@ const resetFormFields = () => {
                   )}
                     <Button
                       variant="contained"
-                      color="primary"
+                      style={{ backgroundColor: 'rgb(70, 130, 180)', color: 'white' }}
                       onClick={onSubmitGame}
                       sx={{ marginTop: '20px' }}
                     >

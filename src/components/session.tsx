@@ -120,7 +120,7 @@ const Sessions = () => {
                                     </LocalizationProvider>
                                     <Button
                                         variant="contained"
-                                        color="primary"
+                                        style={{ backgroundColor: 'rgb(70, 130, 180)', color: 'white' }}
                                         onClick={handleCreateSession}
                                         sx={{ marginTop: '20px' }}
                                     >

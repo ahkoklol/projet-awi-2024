@@ -183,7 +183,7 @@ export default function Cashier() {
             />
           </Grid>
           <Grid item>
-            <Button variant="contained" color="primary" onClick={handleAddItem}>
+            <Button variant="contained"  onClick={handleAddItem} style={{ backgroundColor: 'rgb(70, 130, 180)', color: 'white' }}>
               Add Item to Basket
             </Button>
           </Grid>
@@ -228,7 +228,7 @@ export default function Cashier() {
         </Typography>
       )}
 
-      <Button variant="contained" color="primary" sx={{ marginTop: '10px' }} onClick={handleCheckout}>
+      <Button variant="contained" sx={{ marginTop: '10px' }} onClick={handleCheckout} style={{ backgroundColor: 'rgb(70, 130, 180)', color: 'white' }}>
         Proceed to Checkout
       </Button>
     </Grid>
