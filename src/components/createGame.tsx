@@ -50,70 +50,110 @@ const CreateGame = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', marginTop: '-6rem', marginBottom: '-3rem' }}>
       <Box
-        component="main"
         sx={{
-          flexGrow: 1,
-          p: 1.5,
-          width: { sm: `calc(100% - 240px)` }, // Adjust drawer width if necessary
-          marginLeft: { sm: `240px` },
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+          p: 2,
         }}
       >
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Stack spacing={2} direction="row">
-              <Card sx={{ flexGrow: 1, height: 'auto' }}>
-                <CardContent>
-                  <Typography gutterBottom variant="h5" component="div">
-                    Create a new game
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: 'text.secondary', marginBottom: '1rem' }}>
-                    Use the form below to add new game details.
-                  </Typography>
-                  <TextField
-                    label="Game Name"
-                    value={newGameViewName}
-                    onChange={(e) => setNewGameViewName(e.target.value)}
-                    fullWidth
-                    margin="normal"
-                  />
-                  <TextField
-                    label="Description"
-                    value={newGameViewDescription}
-                    onChange={(e) => setNewGameViewDescription(e.target.value)}
-                    fullWidth
-                    margin="normal"
-                  />
-                  <TextField
-                    label="Publisher"
-                    value={newGameViewPublisher}
-                    onChange={(e) => setNewGameViewPublisher(e.target.value)}
-                    fullWidth
-                    margin="normal"
-                  />
-                  <TextField
-                    label="Release Date"
-                    value={newGameViewReleaseDate}
-                    onChange={(e) => setNewGameViewReleaseDate(parseFloat(e.target.value))}
-                    fullWidth
-                    type="number"
-                    margin="normal"
-                  />
+  
+      <Grid container justifyContent="center">
+        <Grid item xs={12} sx={{ textAlign: "center", marginBottom: 2 }}>
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: "bold",
+              color: "rgb(19, 38, 77)",
+              marginLeft: "220px",
+              marginTop: "-250px",
+            }}
+          >
+            Create a New Game
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12} md={8} lg={6}>
+          <Card
+            sx={{
+              minWidth: "500px",
+              border: "2px solid rgb(19, 38, 77)",
+              borderRadius: "10px",
+              backgroundColor: "rgba(255, 255, 255, 0.9)",
+              boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.15)",
+              transition: "transform 0.3s ease-in-out",
+              "&:hover": { transform: "scale(1.02)" },
+              padding: "20px",
+              marginTop: "-190px",
+              marginLeft: "140px",
+            }}
+          >
+            <CardContent>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  color: "rgb(19, 38, 77)",
+                  marginBottom: 2,
+                }}
+              >
+                Game Details
+              </Typography>
+
+              {/* 🔹 FORMULAIRE COMPACTÉ */}
+              <Stack spacing={2}>
+                <TextField
+                  label="Game Name"
+                  value={newGameViewName}
+                  onChange={(e) => setNewGameViewName(e.target.value)}
+                  fullWidth
+                />
+                <TextField
+                  label="Description"
+                  value={newGameViewDescription}
+                  onChange={(e) => setNewGameViewDescription(e.target.value)}
+                  fullWidth
+                  multiline
+                  rows={3}
+                />
+                <TextField
+                  label="Publisher"
+                  value={newGameViewPublisher}
+                  onChange={(e) => setNewGameViewPublisher(e.target.value)}
+                  fullWidth
+                />
+                <TextField
+                  label="Release Date"
+                  value={newGameViewReleaseDate}
+                  onChange={(e) => setNewGameViewReleaseDate(parseFloat(e.target.value))}
+                  fullWidth
+                  type="number"
+                />
+
+                {/* 🔹 BOUTON AJOUT STYLISÉ */}
+                <Box sx={{ display: "flex", justifyContent: "center", width: "100%", marginTop: 2 }}>
                   <Button
                     variant="contained"
-                    style={{ backgroundColor: 'rgb(70, 130, 180)', color: 'white' }}
+                    sx={{
+                      backgroundColor: "rgb(19, 38, 77)",
+                      color: "white",
+                      "&:hover": { backgroundColor: "rgb(15, 30, 60)" },
+                      width: "200px",
+                    }}
                     onClick={onSubmitGameView}
-                    sx={{ marginTop: '20px' }}
                   >
                     Add Game
                   </Button>
-                </CardContent>
-              </Card>
-            </Stack>
-          </Grid>
+                </Box>
+              </Stack>
+            </CardContent>
+          </Card>
         </Grid>
-      </Box>
+      </Grid>
     </Box>
   );
 };

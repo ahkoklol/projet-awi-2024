@@ -324,8 +324,29 @@ const FinancialStatementSellers: React.FC = () => {
   }
 
   return (
-    <Box p={2}>
-      <Typography variant="h4" gutterBottom>
+    <Box
+      sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh", // Centre verticalement sur toute la hauteur
+          marginLeft: "190px",
+          p: 2,
+      }}
+      >
+
+      {/* 🔹 TITRE CENTRÉ */}
+      <Typography
+          variant="h4"
+          sx={{
+          fontWeight: "bold",
+          textAlign: "center",
+          color: "rgb(19, 38, 77)",
+          marginTop: "-80px",
+          marginBottom: "30px",
+          }}
+      >
         Financial Statements by Session Event
       </Typography>
   
@@ -334,27 +355,73 @@ const FinancialStatementSellers: React.FC = () => {
         const sessionEvent = sessionEventsMap[sessionId] || 'Unknown Event'; // Fetch event name
   
         return (
-          <Box key={sessionId} mb={4}>
-            <Typography variant="h5" gutterBottom>
+          <Box
+            key={sessionId}
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              mb: 4,
+            }}
+          >
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: "bold",
+                color: "rgb(19, 38, 77)",
+                marginBottom: 1,
+                textAlign: "center",
+              }}
+            >
               Financial Statement for Session: {sessionEvent} (ID: {sessionId})
             </Typography>
   
             {sessionStatements.map((statement) => (
-              <Box key={statement.seller_id} mb={4}>
-                <Typography variant="h6" gutterBottom>
+              <Box key={statement.seller_id} sx={{ mb: 4, width: "100%" }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: "bold",
+                    color: "rgb(19, 38, 77)",
+                    marginBottom: 1,
+                    textAlign: "center",
+                  }}
+                >
                   Seller ID: {statement.seller_id}
                 </Typography>
-                <TableContainer component={Paper}>
+  
+                {/* 🔹 TABLEAU CENTRÉ & STYLISÉ */}
+                <TableContainer
+                  component={Paper}
+                  sx={{
+                    border: "2px solid rgb(19, 38, 77)",
+                    borderRadius: "10px",
+                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.15)",
+                    transition: "transform 0.3s ease-in-out",
+                    "&:hover": { transform: "scale(1.02)" },
+                    backgroundColor: "rgba(255, 255, 255, 0.9)",
+                    width: "80%", // Même largeur max pour tous les tableaux
+                    maxWidth: "1000px",
+                    margin: "auto",
+                  }}
+                >
                   <Table>
-                    <TableHead>
+                    <TableHead sx={{ backgroundColor: "rgb(236, 242, 255)" }}>
                       <TableRow>
-                        <TableCell>Games Deposited</TableCell>
-                        <TableCell>Games Sold</TableCell>
-                        <TableCell>Games Remaining</TableCell>
-                        <TableCell>Commissions Paid</TableCell>
-                        <TableCell>Deposit Fees Paid</TableCell>
-                        <TableCell>Total Earnings</TableCell>
-                        <TableCell>Total Due To Seller</TableCell>
+                        {[
+                          "Games Deposited",
+                          "Games Sold",
+                          "Games Remaining",
+                          "Commissions Paid",
+                          "Deposit Fees Paid",
+                          "Total Earnings",
+                          "Total Due To Seller",
+                        ].map((header) => (
+                          <TableCell key={header} sx={{ color: "rgb(19, 38, 77)", fontWeight: "bold" }}>
+                            {header}
+                          </TableCell>
+                        ))}
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -363,22 +430,22 @@ const FinancialStatementSellers: React.FC = () => {
                         <TableCell>{statement.games_sold}</TableCell>
                         <TableCell>{statement.games_remaining}</TableCell>
                         <TableCell>
-                          {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
+                          {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
                             statement.commission_paid
                           )}
                         </TableCell>
                         <TableCell>
-                          {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
+                          {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
                             statement.deposit_fees_paid
                           )}
                         </TableCell>
                         <TableCell>
-                          {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
+                          {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
                             statement.total_earnings
                           )}
                         </TableCell>
                         <TableCell>
-                          {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
+                          {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
                             statement.total_due
                           )}
                         </TableCell>

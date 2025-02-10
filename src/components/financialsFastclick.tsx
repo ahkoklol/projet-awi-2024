@@ -136,75 +136,183 @@ const FinancialStatementFastclick: React.FC = () => {
     }
 
     return (
-        <Box p={2}>
-            <Typography variant="h4" gutterBottom>
-                Financial Statement Fastclick (All Time)
-            </Typography>
-            {financialStatementFastclick && (
-                <TableContainer component={Paper} sx={{ marginBottom: 4 }}>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Commissions Collected</TableCell>
-                                <TableCell>Deposited Fees Collected</TableCell>
-                                <TableCell>Games Remaining</TableCell>
-                                <TableCell>Games Sold</TableCell>
-                                <TableCell>Total Due</TableCell>
-                                <TableCell>Total Earnings</TableCell>
-                                <TableCell>Cash</TableCell>
-                                <TableCell>Net Profit</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            <TableRow>
-                                <TableCell>
-                                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(financialStatementFastclick.commissions_collected)}
-                                </TableCell>
-                                <TableCell>
-                                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(financialStatementFastclick.deposited_fees_collected)}
-                                </TableCell>
-                                <TableCell>{financialStatementFastclick.games_remaining}</TableCell>
-                                <TableCell>{financialStatementFastclick.games_sold}</TableCell>
-                                <TableCell>
-                                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(financialStatementFastclick.total_due)}
-                                </TableCell>
-                                <TableCell>
-                                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(financialStatementFastclick.total_earnings)}
-                                </TableCell>
-                                <TableCell>
-                                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(financialStatementFastclick.cash)}
-                                </TableCell>
-                                <TableCell>
-                                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(financialStatementFastclick.net_profit)}
-                                </TableCell>
-                            </TableRow>
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            )}
+    <Box
+    sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "100vh", // Centre verticalement sur toute la hauteur
+        marginLeft: "190px",
+        p: 2,
+    }}
+    >
 
-            <Typography variant="h4" gutterBottom>
-                Financial Statement Fastclick (By Session)
+    {/* 🔹 TITRE CENTRÉ */}
+    <Typography
+        variant="h4"
+        sx={{
+        fontWeight: "bold",
+        textAlign: "center",
+        color: "rgb(19, 38, 77)",
+        marginTop: "-80px",
+        marginBottom: "30px",
+        }}
+    >
+        Financial Statement Fastclick (All Time)
+    </Typography>
+
+    {/* 🔹 TABLEAU CENTRÉ */}
+    {financialStatementFastclick && (
+        <TableContainer
+        component={Paper}
+        sx={{
+            border: "2px solid rgb(19, 38, 77)",
+            borderRadius: "10px",
+            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.15)",
+            transition: "transform 0.3s ease-in-out",
+            "&:hover": { transform: "scale(1.02)" },
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            width: "80%", // Limite la largeur pour éviter qu'il ne prenne toute la page
+            maxWidth: "1000px", // Empêche le tableau d’être trop large
+            margin: "auto", // Centre horizontalement
+            marginBottom: "30px",
+        }}
+        >
+        <Table>
+            <TableHead sx={{ backgroundColor: "rgb(236, 242, 255)" }}>
+            <TableRow>
+                {[
+                "Commissions Collected",
+                "Deposited Fees Collected",
+                "Games Remaining",
+                "Games Sold",
+                "Total Due",
+                "Total Earnings",
+                "Cash",
+                "Net Profit",
+                ].map((header) => (
+                <TableCell key={header} sx={{ color: "rgb(19, 38, 77)", fontWeight: "bold" }}>
+                    {header}
+                </TableCell>
+                ))}
+            </TableRow>
+            </TableHead>
+            <TableBody>
+            <TableRow>
+                <TableCell>
+                {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(financialStatementFastclick.commissions_collected)}
+                </TableCell>
+                <TableCell>
+                {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(financialStatementFastclick.deposited_fees_collected)}
+                </TableCell>
+                <TableCell>{financialStatementFastclick.games_remaining}</TableCell>
+                <TableCell>{financialStatementFastclick.games_sold}</TableCell>
+                <TableCell>
+                {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(financialStatementFastclick.total_due)}
+                </TableCell>
+                <TableCell>
+                {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(financialStatementFastclick.total_earnings)}
+                </TableCell>
+                <TableCell>
+                {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(financialStatementFastclick.cash)}
+                </TableCell>
+                <TableCell>
+                {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(financialStatementFastclick.net_profit)}
+                </TableCell>
+            </TableRow>
+            </TableBody>
+        </Table>
+        </TableContainer>
+    )}
+
+        {/* 🔹 TITRE CENTRÉ */}
+        <Typography
+            variant="h4"
+            sx={{
+                fontWeight: "0",
+                textAlign: "center",
+                color: "rgb(19, 38, 77)",
+                marginBottom: "70px",
+                marginLeft: "40px",
+                fontSize: "0.7rem",
+            }}
+            >
+            _____________________________________________________________________________________________________________________________________________________________________________
+        </Typography>
+
+
+        {/* 🔹 TITRE CENTRÉ */}
+        <Typography
+        variant="h4"
+        sx={{
+            fontWeight: "bold",
+            textAlign: "center",
+            color: "rgb(19, 38, 77)",
+            marginBottom: 3,
+        }}
+        >
+        Financial Statement Fastclick (By Session)
+        </Typography>
+
+        {Object.keys(financialStatementsBySession).map((sessionId) => (
+        <Box
+            key={sessionId}
+            sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            mb: 4,
+            }}
+        >
+            <Typography
+            variant="h6"
+            sx={{
+                fontWeight: "bold",
+                color: "rgb(19, 38, 77)",
+                marginBottom: 1,
+                textAlign: "center",
+            }}
+            >
+            Session: {sessionEventsMap[sessionId] || "Unknown Event"} (ID: {sessionId})
             </Typography>
-            {Object.keys(financialStatementsBySession).map((sessionId) => (
-                <Box key={sessionId} mb={4}>
-                    <Typography variant="h6" gutterBottom>
-                    Session: {sessionEventsMap[sessionId] || 'Unknown Event'} (ID: {sessionId})
-                    </Typography>
-                    <TableContainer component={Paper}>
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>Commissions Collected</TableCell>
-                                    <TableCell>Deposited Fees Collected</TableCell>
-                                    <TableCell>Games Remaining</TableCell>
-                                    <TableCell>Games Sold</TableCell>
-                                    <TableCell>Total Due</TableCell>
-                                    <TableCell>Total Earnings</TableCell>
-                                    <TableCell>Cash</TableCell>
-                                    <TableCell>Net Profit</TableCell>
-                                </TableRow>
-                            </TableHead>
+
+
+            {/* 🔹 TABLEAU CENTRÉ & STYLISÉ */}
+                <TableContainer
+                component={Paper}
+                sx={{
+                    border: "2px solid rgb(19, 38, 77)",
+                    borderRadius: "10px",
+                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.15)",
+                    transition: "transform 0.3s ease-in-out",
+                    "&:hover": { transform: "scale(1.02)" },
+                    backgroundColor: "rgba(255, 255, 255, 0.9)",
+                    width: "80%", // Même largeur max pour tous les tableaux
+                    maxWidth: "1000px",
+                    margin: "auto",
+                }}
+                >
+                <Table>
+                    <TableHead sx={{ backgroundColor: "rgb(236, 242, 255)" }}>
+                    <TableRow>
+                        {[
+                        "Commissions Collected",
+                        "Deposited Fees Collected",
+                        "Games Remaining",
+                        "Games Sold",
+                        "Total Due",
+                        "Total Earnings",
+                        "Cash",
+                        "Net Profit",
+                        ].map((header) => (
+                        <TableCell key={header} sx={{ color: "rgb(19, 38, 77)", fontWeight: "bold" }}>
+                            {header}
+                        </TableCell>
+                        ))}
+                    </TableRow>
+                        </TableHead>
                             <TableBody>
                                 <TableRow>
                                     <TableCell>

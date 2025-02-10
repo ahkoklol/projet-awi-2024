@@ -5,6 +5,7 @@ import { addDoc, collection, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { database } from '../config/firebase';
 import { toast } from 'react-toastify';
 import { useSession } from '../context/SessionContext';
+import Paper from "@mui/material/Paper";
 
 export default function Cashier() {
   const { basketItems, total, itemCount, clearBasket, addItemToBasket, removeItemFromBasket } = useBasket();
@@ -152,85 +153,172 @@ export default function Cashier() {
 
 
   return (
-    <Grid container direction="column" sx={{ marginTop: '-40px' }} spacing={2}>
-      <Grid item xs={12}>
-        <Typography variant="h3" gutterBottom sx={{ color: 'black' }}>
+    <Grid container direction="column" spacing={3} sx={{ marginTop: "-40px", marginLeft: "0px" }}>
+      {/* 🔹 TITRE (EN DEHORS DES CONTAINERS) */}
+      <Grid item xs={12} sx={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 1, marginLeft: "20px" }}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", textAlign: "center", marginBottom: "-10px"}}>
           Order Summary
         </Typography>
       </Grid>
-
+  
+      {/* 🔹 CONTAINER 1 : CLIENT & AJOUT D'ITEM */}
       <Grid item xs={12}>
-        <TextField
-          label="Customer email (Optional)"
-          variant="outlined"
-          fullWidth
-          size="small"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-      </Grid>
-
-      <Grid item xs={12}>
-        <Grid container spacing={2} sx={{ display: 'flex', alignItems: 'center' }}>
-          <Grid item xs>
-            <TextField
-              label="Item ID"
-              variant="outlined"
-              fullWidth
-              size="small"
-              value={itemId}
-              onChange={(e) => setItemId(e.target.value)}
-            />
-          </Grid>
-          <Grid item>
-            <Button variant="contained"  onClick={handleAddItem} style={{ backgroundColor: 'rgb(70, 130, 180)', color: 'white' }}>
-              Add Item to Basket
-            </Button>
-          </Grid>
-        </Grid>
-
-        <Typography variant="h5" gutterBottom sx={{ color: 'black', marginTop:'30px' }}>
-          {itemCount} items
-        </Typography>
-
-        <List disablePadding>
-          {basketItems.map((item) => (
-            <ListItem key={item.id} sx={{ py: 1, px: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <ListItemText sx={{ mr: 2, color: 'black' }} primary={item.name} />
-              <Typography variant="body1" sx={{ fontWeight: 'medium', color: 'black', mr: 2 }}>
-                ${item.price.toFixed(2)}
-              </Typography>
+        <Paper
+          elevation={3}
+          sx={{
+            padding: "20px",
+            border: "2px solid rgb(19, 38, 77)",
+            borderRadius: "10px",
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.15)", // Ombre douce
+            transition: "transform 0.3s ease-in-out",
+            "&:hover": { transform: "scale(1.02)" },
+          }}
+        >
+          <Typography variant="h5" sx={{ fontWeight: "bold", marginBottom: 2 }}>
+            Customer Details
+          </Typography>
+          <TextField
+            label="Customer email (Optional)"
+            variant="outlined"
+            fullWidth
+            size="small"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+  
+          <Typography variant="h5" sx={{ fontWeight: "bold", marginTop: 3, marginBottom: 2 }}>
+            Add Item
+          </Typography>
+          <Grid container spacing={2} sx={{ display: "flex", alignItems: "center" }}>
+            <Grid item xs>
+              <TextField
+                label="Item ID"
+                variant="outlined"
+                fullWidth
+                size="small"
+                value={itemId}
+                onChange={(e) => setItemId(e.target.value)}
+              />
+            </Grid>
+            <Grid item>
               <Button
-                variant="text"
-                color="secondary"
-                onClick={() => removeItemFromBasket(item.id)}
-                sx={{ fontWeight: 'bold', fontSize: '0.8rem' }}
+                variant="contained"
+                onClick={handleAddItem}
+                sx={{
+                  backgroundColor: "rgb(19, 38, 77)",
+                  color: "white",
+                  "&:hover": { backgroundColor: "rgb(15, 30, 60)" },
+                }}
               >
-                Remove
+                Add Item to Basket
               </Button>
-            </ListItem>
-          ))}
-        </List>
-        
-        <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
-          Total
-        </Typography>
-        <Typography variant="h4" gutterBottom sx={{ color: 'black' }}>
-          ${total.toFixed(2)}
-        </Typography>
+            </Grid>
+          </Grid>
+        </Paper>
       </Grid>
-
-      
-
-      {error && (
-        <Typography color="error" sx={{ marginTop: '10px' }}>
-          {error}
-        </Typography>
-      )}
-
-      <Button variant="contained" sx={{ marginTop: '10px' }} onClick={handleCheckout} style={{ backgroundColor: 'rgb(70, 130, 180)', color: 'white' }}>
-        Proceed to Checkout
-      </Button>
+  
+      {/* 🔹 CONTAINER 2 : LISTE DES ITEMS */}
+      <Grid item xs={12}>
+        <Paper
+          elevation={3}
+          sx={{
+            padding: "20px",
+            border: "2px solid rgb(19, 38, 77)",
+            borderRadius: "10px",
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.15)", // Ombre douce
+            transition: "transform 0.3s ease-in-out",
+            "&:hover": { transform: "scale(1.02)" },
+          }}
+        >
+          <Typography variant="h5" sx={{ fontWeight: "bold", marginBottom: 2 }}>
+            Basket ({itemCount} items)
+          </Typography>
+  
+          <List disablePadding>
+            {basketItems.map((item) => (
+              <ListItem
+                key={item.id}
+                sx={{
+                  py: 1,
+                  px: 0,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <ListItemText
+                  primaryTypographyProps={{ fontWeight: "bold" }}
+                  primary={item.name}
+                />
+                <Typography variant="body1" sx={{ fontWeight: "bold", color: "rgb(19, 38, 77)", mr: 2 }}>
+                  ${item.price.toFixed(2)}
+                </Typography>
+                <Button
+                  variant="contained"
+                  onClick={() => removeItemFromBasket(item.id)}
+                  sx={{
+                    fontWeight: "bold",
+                    fontSize: "0.8rem",
+                    backgroundColor: "#800000", // Rouge Bordeaux
+                    color: "white",
+                    "&:hover": { backgroundColor: "#600000" }, // Rouge plus foncé au hover
+                  }}
+                >
+                  Remove
+                </Button>
+              </ListItem>
+            ))}
+          </List>
+        </Paper>
+      </Grid>
+  
+      {/* 🔹 CONTAINER 3 : TOTAL & CHECKOUT */}
+      <Grid item xs={12}>
+        <Paper
+          elevation={3}
+          sx={{
+            padding: "20px",
+            border: "2px solid rgb(19, 38, 77)",
+            borderRadius: "10px",
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.15)", // Ombre douce
+            transition: "transform 0.3s ease-in-out",
+            "&:hover": { transform: "scale(1.02)" },
+          }}
+        >
+          <Typography variant="h5" sx={{ fontWeight: "bold", marginBottom: 2 }}>
+            Total
+          </Typography>
+          <Typography variant="h4" sx={{ fontWeight: "bold", marginBottom: 3 }}>
+            ${total.toFixed(2)}
+          </Typography>
+  
+          {error && (
+            <Typography color="error" sx={{ marginTop: "10px" }}>
+              {error}
+            </Typography>
+          )}
+  
+          <Button
+            variant="contained"
+            sx={{
+              marginTop: "10px",
+              backgroundColor: "rgb(19, 38, 77)",
+              color: "white",
+              "&:hover": { backgroundColor: "rgb(15, 30, 60)" },
+              width: "250px", // Réduction de la largeur
+              display: "block",
+              marginLeft: "auto",
+              marginRight: "auto", // Centrage horizontal
+            }}
+            onClick={handleCheckout}
+          >
+            Proceed to Checkout
+          </Button>
+        </Paper>
+      </Grid>
     </Grid>
   );
 }

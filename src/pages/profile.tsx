@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { query, where, getDocs, collection, addDoc } from 'firebase/firestore';
-import { Container, Typography, List, SelectChangeEvent, ListItem, Grid, FormControl, InputLabel, Select, Stack, Card, TextField, CardContent, Button, ListItemButton, ListItemIcon, ListItemText, Paper, CircularProgress, Box, CssBaseline, Toolbar, Divider, Drawer, MenuItem } from '@mui/material';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
+import { Container, Typography, List, SelectChangeEvent, ListItem, Grid, FormControl, InputLabel, Select, TextField, Button, ListItemButton, ListItemIcon, ListItemText, Paper, CircularProgress, Box, CssBaseline, Toolbar, Divider, Drawer, MenuItem } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { auth, database } from '../config/firebase';
 import { toast } from "react-toastify";
@@ -16,6 +14,14 @@ import CreateGame from '../components/createGame';
 import Stock from '../components/stock';
 import FinancialStatementSellers from '../components/financialsSellers';
 import Sessions from '../components/session';
+import PersonIcon from "@mui/icons-material/Person";
+import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
+import InventoryIcon from "@mui/icons-material/Inventory";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
+import AddBoxIcon from "@mui/icons-material/AddBox";
+import GroupAddIcon from "@mui/icons-material/GroupAdd";
+import HistoryIcon from "@mui/icons-material/History";
 
 const drawerWidth = 240;
 
@@ -34,7 +40,7 @@ export default function ProfilePage() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [selectedMenu, setSelectedMenu] = useState('Edit Profile');
+  const [selectedMenu, setSelectedMenu] = useState('Profile View');
   const [newGamePrice, setNewGamePrice] = useState(0);
   const [sellerId, setSellerId] = useState('');
   const [quantity, setQuantity] = useState(0);
@@ -227,113 +233,128 @@ const resetFormFields = () => {
 };
   
   const drawer = (
-    <div>
-      <Toolbar style={{ paddingTop: '66px', paddingBottom: '2px' }}>
-        <ListItem>
-          <ListItemIcon>
-            <AccountCircleIcon fontSize="large" />
-          </ListItemIcon>
-          <ListItemText
-            primary={`${userProfile?.firstname} ${userProfile?.lastname}`}
-            secondary={`${userProfile?.role}`}
-          />
-        </ListItem>
-      </Toolbar>
-      <Divider />
-      <List>
-        {/* Always available menu items */}
-        <ListItem disablePadding>
-          <ListItemButton onClick={() => setSelectedMenu('Edit Profile')}>
+      <div>
+        <Toolbar style={{ paddingTop: "66px", paddingBottom: "2px" }}>
+          <ListItem>
             <ListItemIcon>
-              <InboxIcon />
+              <AccountCircleIcon fontSize="large" sx={{ color: "rgb(19, 38, 77)" }} />
             </ListItemIcon>
-            <ListItemText primary="Edit Profile" />
-          </ListItemButton>
-        </ListItem>
+            <ListItemText
+              primary={`${userProfile?.firstname} ${userProfile?.lastname}`}
+              secondary={`${userProfile?.role}`}
+            />
+          </ListItem>
+        </Toolbar>
+        <Divider />
+        <List>
+          {/* Always available menu items */}
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => setSelectedMenu("Profile View")}>
+              <ListItemIcon>
+                <PersonIcon sx={{ color: "rgb(19, 38, 77)" }} />
+              </ListItemIcon>
+              <ListItemText primary="Profile View" />
+            </ListItemButton>
+          </ListItem>
 
           <ListItem disablePadding>
-            <ListItemButton onClick={() => setSelectedMenu('Cashier')}>
+            <ListItemButton onClick={() => setSelectedMenu("Cashier")}>
               <ListItemIcon>
-                <InboxIcon />
+                <PointOfSaleIcon sx={{ color: "rgb(19, 38, 77)" }} />
               </ListItemIcon>
               <ListItemText primary="Cashier" />
             </ListItemButton>
           </ListItem>
-          <ListItem disablePadding>
-              <ListItemButton onClick={() => setSelectedMenu('Stock')}>
-                <ListItemIcon>
-                  <MailIcon />
-                </ListItemIcon>
-                <ListItemText primary="Stock" />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton onClick={() => setSelectedMenu('Deposit Product')}>
-                <ListItemIcon>
-                  <MailIcon />
-                </ListItemIcon>
-                <ListItemText primary="Deposit Product" />
-              </ListItemButton>
-            </ListItem>
 
-        {/* Conditional rendering for admins */}
-        {userProfile?.role === 'admin' && (
-          <>
-            <ListItem disablePadding>
-              <ListItemButton onClick={() => setSelectedMenu('Financials Fastclick')}>
-                <ListItemIcon>
-                  <MailIcon />
-                </ListItemIcon>
-                <ListItemText primary="Financials Fastclick" />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton onClick={() => setSelectedMenu('Financials Sellers')}>
-                <ListItemIcon>
-                  <MailIcon />
-                </ListItemIcon>
-                <ListItemText primary="Financials Sellers" />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton onClick={() => setSelectedMenu('Create Game')}>
-                <ListItemIcon>
-                  <MailIcon />
-                </ListItemIcon>
-                <ListItemText primary="Create Game" />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton onClick={() => setSelectedMenu('Create Employee')}>
-                <ListItemIcon>
-                  <InboxIcon />
-                </ListItemIcon>
-                <ListItemText primary="Create Employee" />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton onClick={() => setSelectedMenu('Sessions')}>
-                <ListItemIcon>
-                  <InboxIcon />
-                </ListItemIcon>
-                <ListItemText primary="Sessions" />
-              </ListItemButton>
-            </ListItem>
-          </>
-        )}
-      </List>
-    </div>
-  );
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => setSelectedMenu("Stock")}>
+              <ListItemIcon>
+                <InventoryIcon sx={{ color: "rgb(19, 38, 77)" }} />
+              </ListItemIcon>
+              <ListItemText primary="Stock" />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => setSelectedMenu("Deposit Product")}>
+              <ListItemIcon>
+                <AttachMoneyIcon sx={{ color: "rgb(19, 38, 77)" }} />
+              </ListItemIcon>
+              <ListItemText primary="Deposit Product" />
+            </ListItemButton>
+          </ListItem>
+
+          {/* Conditional rendering for admins */}
+          {userProfile?.role === "admin" && (
+            <>
+              <ListItem disablePadding>
+                <ListItemButton onClick={() => setSelectedMenu("Financials Fastclick")}>
+                  <ListItemIcon>
+                    <MonetizationOnIcon sx={{ color: "rgb(19, 38, 77)" }} />
+                  </ListItemIcon>
+                  <ListItemText primary="Financials Fastclick" />
+                </ListItemButton>
+              </ListItem>
+
+              <ListItem disablePadding>
+                <ListItemButton onClick={() => setSelectedMenu("Financials Sellers")}>
+                  <ListItemIcon>
+                    <MonetizationOnIcon sx={{ color: "rgb(19, 38, 77)" }} />
+                  </ListItemIcon>
+                  <ListItemText primary="Financials Sellers" />
+                </ListItemButton>
+              </ListItem>
+
+              <ListItem disablePadding>
+                <ListItemButton onClick={() => setSelectedMenu("Create Game")}>
+                  <ListItemIcon>
+                    <AddBoxIcon sx={{ color: "rgb(19, 38, 77)" }} />
+                  </ListItemIcon>
+                  <ListItemText primary="Create Game" />
+                </ListItemButton>
+              </ListItem>
+
+              <ListItem disablePadding>
+                <ListItemButton onClick={() => setSelectedMenu("Create Employee")}>
+                  <ListItemIcon>
+                    <GroupAddIcon sx={{ color: "rgb(19, 38, 77)" }} />
+                  </ListItemIcon>
+                  <ListItemText primary="Create Employee" />
+                </ListItemButton>
+              </ListItem>
+
+              <ListItem disablePadding>
+                <ListItemButton onClick={() => setSelectedMenu("Sessions")}>
+                  <ListItemIcon>
+                    <HistoryIcon sx={{ color: "rgb(19, 38, 77)" }} />
+                  </ListItemIcon>
+                  <ListItemText primary="Sessions" />
+                </ListItemButton>
+              </ListItem>
+            </>
+          )}
+        </List>
+      </div>
+);
 
 
   const renderContent = () => {
-    if (selectedMenu === 'Edit Profile' && userProfile) {
+    if (selectedMenu === 'Profile View' && userProfile) {
       return (
-        <Paper elevation={3} style={{ padding: '20px', marginTop: '-70px', marginBottom: '20px', marginLeft: `${drawerWidth}px` }}>
-          <Typography variant="h4" gutterBottom>
-            User Profile
-          </Typography>
-          <Typography variant="h4" style={{ marginTop: "20px" }}>
+            <Paper
+            elevation={0}
+            sx={{
+              padding: "20px",
+              marginTop: "-70px",
+              marginBottom: "20px",
+              marginLeft: `${drawerWidth}px`,
+              boxShadow: "0px 8px 10px rgba(0, 0, 0, 0.2)",
+              border: 3,
+              borderRadius: 7,
+              borderColor: 'rgb(19, 38, 77)',
+            }}
+          >
+          <Typography variant="h4" fontWeight={600} style={{ marginTop: "20px" }}>
             {userProfile.firstname} {userProfile.lastname}
           </Typography>
           <Typography variant="subtitle2" color="textSecondary">
@@ -341,16 +362,25 @@ const resetFormFields = () => {
           </Typography>
           <List dense>
             <ListItem>
-              <ListItemText primary="Email" secondary={userProfile.email} />
+              <ListItemText
+                primary="Email"
+                secondary={userProfile.email}
+                primaryTypographyProps={{ fontWeight: "bold" }} // Met en gras
+              />
             </ListItem>
             <ListItem>
-            <ListItemText primary="Phone" secondary={userProfile.phone} />
+              <ListItemText
+                primary="Phone"
+                secondary={userProfile.phone}
+                primaryTypographyProps={{ fontWeight: "bold" }} // Met en gras
+              />
             </ListItem>
             <ListItem>
-            <ListItemText primary="Address" secondary={userProfile.address} />
-            </ListItem>
-            <ListItem>
-            <ListItemText primary="Date joined" secondary={userProfile.date_joined} />
+              <ListItemText
+                primary="Address"
+                secondary={userProfile.address}
+                primaryTypographyProps={{ fontWeight: "bold" }} // Met en gras
+              />
             </ListItem>
           </List>
         </Paper>
@@ -373,38 +403,63 @@ const resetFormFields = () => {
       );
     }
 
+
+
+
+
+
+
+
+
+
     if (selectedMenu === 'Deposit Product') {
       return (
-        <Box sx={{ display: 'flex', marginTop: '-6rem', marginBottom: '-3rem' }}>
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 1.5,
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          marginLeft: { sm: `${drawerWidth}px` },
-        }}
-      >
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Stack spacing={2} direction="row">
-              <Card sx={{ flexGrow: 1, height: 'auto' }}>
-                <CardContent>
-                  <Typography gutterBottom variant="h5" component="div">
-                    Deposit a product
+        <Box sx={{ display: "flex", marginTop: "-6rem", marginBottom: "-3rem" }}>
+          <Box
+            component="main"
+            sx={{
+              flexGrow: 1,
+              p: 2,
+              width: "100%",
+              marginLeft: { sm: `${drawerWidth}px` },
+            }}
+          >
+            <Grid container spacing={3}>
+              {/* 🔹 TITRE CENTRÉ */}
+              <Grid item xs={12}>
+                <Typography
+                  variant="h4"
+                  sx={{ fontWeight: "bold", textAlign: "center", color: "rgb(19, 38, 77)", marginBottom: 2 }}
+                >
+                  Deposit a Product
+                </Typography>
+              </Grid>
+    
+              {/* 🔹 SECTION GAME INFO */}
+              <Grid item xs={12} md={6}>
+                <Paper
+                  sx={{
+                    padding: "20px",
+                    border: "2px solid rgb(19, 38, 77)",
+                    borderRadius: "10px",
+                    backgroundColor: "rgba(255, 255, 255, 0.9)",
+                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.15)",
+                    transition: "transform 0.3s ease-in-out",
+                    "&:hover": { transform: "scale(1.02)" },
+                  }}
+                >
+                  <Typography variant="h6" sx={{ fontWeight: "bold", marginBottom: 2 }}>
+                    Game Details
                   </Typography>
-                  <Typography variant="body2" sx={{ color: 'text.secondary', marginBottom: '1rem' }}>
-                    Use the form below to add new game details.
-                  </Typography>
-                  <FormControl fullWidth margin="normal">
-                    <InputLabel id="game-name-label">Game Name - If not available, create a new game</InputLabel>
+    
+                  <FormControl fullWidth sx={{ marginBottom: 2 }}>
+                    <InputLabel id="game-name-label">Game Name</InputLabel>
                     <Select
                       labelId="game-name-label"
                       id="game-name"
                       value={selectedGameName}
                       onChange={handleGameNameChange}
-                      label="Game Name - If not available, create a new game"
-                      sx={{ textAlign: 'left' }}
+                      label="Game Name"
                     >
                       {gameNames.map((name) => (
                         <MenuItem key={name} value={name}>
@@ -413,53 +468,88 @@ const resetFormFields = () => {
                       ))}
                     </Select>
                   </FormControl>
-                  <TextField
-                    label="Price"
-                    value={newGamePrice}
-                    onChange={(e) => setNewGamePrice(parseFloat(e.target.value))}
-                    type="number"
-                    fullWidth
-                    margin="normal"
-                  />
-                  <TextField
-                    label="Quantity"
-                    value={quantity}
-                    onChange={(e) => setQuantity(parseFloat(e.target.value))}
-                    type="number"
-                    fullWidth
-                    margin="normal"
-                  />
-                  <TextField
-                    label="Deposit Fee"
-                    value={deposit_fee}
-                    onChange={(e) => setDepositFee(parseFloat(e.target.value))}
-                    type="number"
-                    fullWidth
-                    margin="normal"
-                  />
-                  <FormControl fullWidth margin="normal">
-                    <InputLabel id="deposit-fee-type-label">Deposit Fee Type</InputLabel>
-                    <Select
-                      labelId="deposit-fee-type-label"
-                      id="deposit-fee-type"
-                      value={deposit_fee_type}
-                      onChange={(e) => setDepositType(e.target.value)}
-                      label="Deposit Fee Type"
-                      sx={{ textAlign: 'left' }}
-                    >
-                      <MenuItem value="fixed">Fixed</MenuItem>
-                      <MenuItem value="percentage">Percentage</MenuItem>
-                    </Select>
-                  </FormControl>
+    
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <TextField label="Price" type="number" value={newGamePrice} onChange={(e) => setNewGamePrice(parseFloat(e.target.value))} fullWidth />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <TextField label="Quantity" type="number" value={quantity} onChange={(e) => setQuantity(parseFloat(e.target.value))} fullWidth />
+                    </Grid>
+                  </Grid>
+                </Paper>
+              </Grid>
+    
+              {/* 🔹 SECTION DEPOSIT INFO */}
+              <Grid item xs={12} md={6}>
+                <Paper
+                  sx={{
+                    padding: "20px",
+                    border: "2px solid rgb(19, 38, 77)",
+                    borderRadius: "10px",
+                    backgroundColor: "rgba(255, 255, 255, 0.9)",
+                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.15)",
+                    transition: "transform 0.3s ease-in-out",
+                    "&:hover": { transform: "scale(1.02)" },
+                  }}
+                >
+                  <Typography variant="h6" sx={{ fontWeight: "bold", marginBottom: 2 }}>
+                    Deposit Information
+                  </Typography>
+    
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <TextField label="Deposit Fee" type="number" value={deposit_fee} onChange={(e) => setDepositFee(parseFloat(e.target.value))} fullWidth />
+                    </Grid>
+                    <Grid item xs={6}>
+
+                    <FormControl fullWidth sx={{ marginBottom: 2 }}>
+                      <InputLabel id="deposit-fee-type-label">Deposit Fee Type</InputLabel>
+                      <Select
+                        labelId="deposit-fee-type-label"
+                        id="deposit-fee-type"
+                        value={deposit_fee_type}
+                        onChange={(e) => setDepositType(e.target.value)}
+                        label="Deposit Fee Type"
+                      >
+                        <MenuItem value="fixed">Fixed</MenuItem>
+                        <MenuItem value="percentage">Percentage</MenuItem>
+                      </Select>
+                    </FormControl>
+
+                    </Grid>
+                  </Grid>
+    
                   <TextField
                     label="Commission"
+                    type="number"
                     value={commission}
                     onChange={(e) => setCommission(parseFloat(e.target.value))}
-                    type="number"
                     fullWidth
-                    margin="normal"
+                    sx={{ marginTop: 2 }}
                   />
-                  <FormControl fullWidth margin="normal">
+                </Paper>
+              </Grid>
+    
+              {/* 🔹 SECTION STOCK LOCATION */}
+              <Grid item xs={12} md={6}>
+                <Paper
+                  sx={{
+                    padding: "20px",
+                    border: "2px solid rgb(19, 38, 77)",
+                    borderRadius: "10px",
+                    backgroundColor: "rgba(255, 255, 255, 0.9)",
+                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.15)",
+                    transition: "transform 0.3s ease-in-out",
+                    "&:hover": { transform: "scale(1.02)" },
+                  }}
+                >
+                  <Typography variant="h6" sx={{ fontWeight: "bold", marginBottom: 2 }}>
+                    Stock Information
+                  </Typography>
+    
+
+                  <FormControl fullWidth sx={{ marginBottom: 2 }}>
                     <InputLabel id="stock-location-label">Stock Location</InputLabel>
                     <Select
                       labelId="stock-location-label"
@@ -467,71 +557,73 @@ const resetFormFields = () => {
                       value={stockLocation}
                       onChange={handleStockLocationChange}
                       label="Stock Location"
-                      sx={{ textAlign: 'left' }}
                     >
                       <MenuItem value="aisle">To the Aisle</MenuItem>
                       <MenuItem value="storage">To Storage</MenuItem>
                     </Select>
                   </FormControl>
-                  <TextField
-                    label="Seller Email"
-                    value={sellerEmail}
-                    onChange={(e) => setSellerEmail(e.target.value)}
-                    type="email"
-                    fullWidth
-                    margin="normal"
-                  />
-                  {/* Additional Fields for new seller */}
+                </Paper>
+              </Grid>
+    
+              {/* 🔹 SECTION SELLER INFO */}
+              <Grid item xs={12} md={6}>
+                <Paper
+                  sx={{
+                    padding: "20px",
+                    border: "2px solid rgb(19, 38, 77)",
+                    borderRadius: "10px",
+                    backgroundColor: "rgba(255, 255, 255, 0.9)",
+                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.15)",
+                    transition: "transform 0.3s ease-in-out",
+                    "&:hover": { transform: "scale(1.02)" },
+                  }}
+                >
+                  <Typography variant="h6" sx={{ fontWeight: "bold", marginBottom: 2 }}>
+                    Seller Information
+                  </Typography>
+    
+                  <TextField label="Seller Email" type="email" value={sellerEmail} onChange={(e) => setSellerEmail(e.target.value)} fullWidth />
+    
                   {showAdditionalFields && (
                     <>
-                      <TextField
-                        label="First Name"
-                        value={sellerFirstname}
-                        onChange={(e) => setSellerFirstname(e.target.value)}
-                        fullWidth
-                        margin="normal"
-                      />
-                      <TextField
-                        label="Last Name"
-                        value={sellerLastname}
-                        onChange={(e) => setSellerLastname(e.target.value)}
-                        fullWidth
-                        margin="normal"
-                      />
-                      <TextField
-                        label="Address"
-                        value={sellerAddress}
-                        onChange={(e) => setSellerAddress(e.target.value)}
-                        fullWidth
-                        margin="normal"
-                      />
-                      <TextField
-                        label="Phone"
-                        value={sellerPhone}
-                        onChange={(e) => setSellerPhone(e.target.value)}
-                        type="number"
-                        fullWidth
-                        margin="normal"
-                      />
+                      <TextField label="First Name" value={sellerFirstname} onChange={(e) => setSellerFirstname(e.target.value)} fullWidth sx={{ marginTop: 2 }} />
+                      <TextField label="Last Name" value={sellerLastname} onChange={(e) => setSellerLastname(e.target.value)} fullWidth sx={{ marginTop: 2 }} />
+                      <TextField label="Address" value={sellerAddress} onChange={(e) => setSellerAddress(e.target.value)} fullWidth sx={{ marginTop: 2 }} />
+                      <TextField label="Phone" type="number" value={sellerPhone} onChange={(e) => setSellerPhone(e.target.value)} fullWidth sx={{ marginTop: 2 }} />
                     </>
                   )}
-                    <Button
-                      variant="contained"
-                      style={{ backgroundColor: 'rgb(70, 130, 180)', color: 'white' }}
-                      onClick={onSubmitGame}
-                      sx={{ marginTop: '20px' }}
-                    >
-                      Add Game
-                    </Button>
-                </CardContent>
-              </Card>
-            </Stack>
-          </Grid>
-        </Grid>
-      </Box>
-    </Box>
+                </Paper>
+              </Grid>
+    
+              {/* 🔹 BOUTON ADD GAME */}
+              <Grid item xs={12} sx={{ display: "flex", justifyContent: "center" }}>
+                <Button
+                  variant="contained"
+                  sx={{
+                    backgroundColor: "rgb(19, 38, 77)",
+                    color: "white",
+                    "&:hover": { backgroundColor: "rgb(15, 30, 60)" },
+                    width: "200px",
+                  }}
+                  onClick={onSubmitGame}
+                >
+                  Add Game
+                </Button>
+              </Grid>
+            </Grid>
+          </Box>
+        </Box>
       );
     }
+
+
+
+
+
+
+
+
+    
 
     if (selectedMenu === 'Create Game') {
       return (

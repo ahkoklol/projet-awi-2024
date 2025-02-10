@@ -77,137 +77,165 @@ function SignUp() {
 
   return (
     <ThemeProvider theme={createTheme()}>
-      <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <Box
-          sx={{
-            marginTop: 8,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            marginBottom: '50px',
-          }}
-        >
-          <Avatar sx={{ m: 1, backgroundColor: 'rgb(62, 86, 124)' }}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            Create Employee Account
-          </Typography>
-          <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  autoComplete="given-name"
-                  name="firstName"
-                  required
-                  fullWidth
-                  id="firstName"
-                  label="First Name"
-                  autoFocus
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  fullWidth
-                  id="lastName"
-                  label="Last Name"
-                  name="lastName"
-                  autoComplete="family-name"
-                  value={surname}
-                  onChange={(event) => setSurname(event.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  name="password"
-                  label="Password"
-                  type="password"
-                  autoComplete="new-password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  id="phone"
-                  label="Phone"
-                  name="phone"
-                  autoComplete="tel"
-                  value={phone}
-                  onChange={(event) => setPhone(event.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  id="address"
-                  label="Address"
-                  name="address"
-                  autoComplete="address"
-                  value={address}
-                  onChange={(event) => setAddress(event.target.value)}
-                />
-              </Grid>
+  <Container component="main" maxWidth="xs">
+    <CssBaseline />
+    <Box
+      sx={{
+        marginTop: 8,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        marginBottom: "50px",
+      }}
+    >
+      {/* 🔹 AVATAR AVEC COULEUR BLEU MARINE */}
+      <Avatar sx={{ m: 1, backgroundColor: "rgb(19, 38, 77)", boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.15)" }}>
+        <LockOutlinedIcon />
+      </Avatar>
 
-              {/* Radio Buttons for selecting Role */}
-                <Grid item xs={12} style={{ display: 'flex', alignItems: 'center' }}>
-                  <FormLabel component="legend" style={{ marginRight: '10px' }}>New employee role</FormLabel>
-                  <RadioGroup
-                    aria-label="role"
-                    name="role"
-                    value={role}
-                    onChange={(event) => setRole(event.target.value)}
-                    row
-                  >
-                    <FormControlLabel value="admin" control={<Radio />} label="Admin" />
-                    <FormControlLabel value="cashier" control={<Radio />} label="Cashier" />
-                  </RadioGroup>
-                </Grid>
+      {/* 🔹 TITRE STYLISÉ */}
+      <Typography
+        component="h1"
+        variant="h5"
+        sx={{
+          fontWeight: "bold",
+          color: "rgb(19, 38, 77)",
+          textAlign: "center",
+        }}
+      >
+        Create Employee Account
+      </Typography>
 
-            </Grid>
-
-            <Button
-              type="submit"
+      {/* 🔹 CONTAINER FORMULAIRE AVEC STYLISATION */}
+      <Box
+        component="form"
+        noValidate
+        onSubmit={handleSubmit}
+        sx={{
+          mt: 3,
+          padding: "20px",
+          border: "2px solid rgb(19, 38, 77)",
+          borderRadius: "10px",
+          backgroundColor: "rgba(255, 255, 255, 0.9)",
+          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.15)",
+          transition: "transform 0.3s ease-in-out",
+          "&:hover": { transform: "scale(1.02)" },
+        }}
+      >
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              autoComplete="given-name"
+              name="firstName"
+              required
               fullWidth
-              variant="contained"
-              sx={{
-                mt: 3,
-                mb: 2,
-                marginTop: '10px',
-                backgroundColor: 'rgb(70, 130, 180)',
-                color: 'white',
-                '&:hover': { backgroundColor: 'rgb(51, 79, 161)', borderColor: 'rgb(75, 184, 185)' },
-              }}
-              disabled={isLoading}
+              id="firstName"
+              label="First Name"
+              autoFocus
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              required
+              fullWidth
+              id="lastName"
+              label="Last Name"
+              name="lastName"
+              autoComplete="family-name"
+              value={surname}
+              onChange={(event) => setSurname(event.target.value)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              required
+              fullWidth
+              id="email"
+              label="Email Address"
+              name="email"
+              autoComplete="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              required
+              fullWidth
+              name="password"
+              label="Password"
+              type="password"
+              autoComplete="new-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              required
+              fullWidth
+              id="phone"
+              label="Phone"
+              name="phone"
+              autoComplete="tel"
+              value={phone}
+              onChange={(event) => setPhone(event.target.value)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              required
+              fullWidth
+              id="address"
+              label="Address"
+              name="address"
+              autoComplete="address"
+              value={address}
+              onChange={(event) => setAddress(event.target.value)}
+            />
+          </Grid>
+
+          {/* 🔹 RADIO BUTTONS AVEC STYLE */}
+          <Grid item xs={12} sx={{ display: "flex", alignItems: "center", flexDirection: "column" }}>
+            <FormLabel component="legend" sx={{ color: "rgb(19, 38, 77)", fontWeight: "bold" }}>
+              New employee role
+            </FormLabel>
+            <RadioGroup
+              aria-label="role"
+              name="role"
+              value={role}
+              onChange={(event) => setRole(event.target.value)}
+              row
             >
-              Create Account
-            </Button>
-          </Box>
+              <FormControlLabel value="admin" control={<Radio sx={{ color: "rgb(19, 38, 77)" }} />} label="Admin" />
+              <FormControlLabel value="cashier" control={<Radio sx={{ color: "rgb(19, 38, 77)" }} />} label="Cashier" />
+            </RadioGroup>
+          </Grid>
+        </Grid>
+
+        {/* 🔹 BOUTON AVEC STYLE & ANIMATION */}
+        <Box sx={{ display: "flex", justifyContent: "center", marginTop: 3 }}>
+          <Button
+            type="submit"
+            variant="contained"
+            sx={{
+              backgroundColor: "rgb(19, 38, 77)",
+              color: "white",
+              "&:hover": { backgroundColor: "rgb(15, 30, 60)" },
+              width: "200px",
+            }}
+            disabled={isLoading}
+          >
+            Create Account
+          </Button>
         </Box>
-      </Container>
-      <ToastContainer />
-    </ThemeProvider>
+      </Box>
+    </Box>
+  </Container>
+  <ToastContainer />
+</ThemeProvider>
   );
 }
 

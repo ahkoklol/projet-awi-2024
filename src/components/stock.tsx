@@ -61,34 +61,72 @@ const Stock = () => {
           marginLeft: { sm: `240px` },
         }}
       >
-        <Typography variant="h5" gutterBottom>
+        {/* 🔹 TITRE CENTRÉ */}
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{ fontWeight: "bold", color: "rgb(19, 38, 77)", textAlign: "center" }}
+        >
           Games in Stock
         </Typography>
-
+  
         {userGames.length === 0 ? (
-          <Typography variant="body2" color="textSecondary">
+          <Typography variant="body2" sx={{ color: "text.secondary", textAlign: "center", fontWeight: "bold" }}>
             No games in stock
           </Typography>
         ) : (
           <Grid container spacing={2}>
             {userGames.map((game) => (
               <Grid item xs={12} sm={6} md={4} key={game.id}>
-                <Card>
+                <Card
+                  sx={{
+                    border: "2px solid rgb(19, 38, 77)", // Bordure bleu marine
+                    borderRadius: "10px",
+                    backgroundColor: "rgba(255, 255, 255, 0.9)",
+                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.15)", // Ombre douce
+                    transition: "transform 0.3s ease-in-out",
+                    "&:hover": { transform: "scale(1.02)" }, // Effet zoom au hover
+                  }}
+                >
                   <CardContent sx={{ marginBottom: '-5px' }}>
-                    <Typography variant="h6" sx={{ display: '-webkit-box', overflow: 'hidden', WebkitBoxOrient: 'vertical', WebkitLineClamp: 1 }}>{game.name}</Typography>
-                    <Typography variant="body2">Price: ${game.price}</Typography>
-                    <Typography variant="body2">Stock Status: {game.stock_status}</Typography>
-                    
+                    {/* 🔹 NOM DU JEU EN GRAS */}
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        display: '-webkit-box',
+                        overflow: 'hidden',
+                        WebkitBoxOrient: 'vertical',
+                        WebkitLineClamp: 1,
+                        fontWeight: "bold",
+                        color: "rgb(19, 38, 77)",
+                      }}
+                    >
+                      {game.name}
+                    </Typography>
+  
+                    {/* 🔹 INFORMATIONS EN GRAS */}
+                    <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+                      Price: <span style={{ fontWeight: "normal" }}>${game.price}</span>
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+                      Stock Status: <span style={{ fontWeight: "normal" }}>{game.stock_status}</span>
+                    </Typography>
+  
+                    {/* 🔹 CHECKBOX POUR CHANGEMENT DE STATUT */}
                     {game.stock_status === 'pending' && (
                       <FormControlLabel
                         control={
                           <Checkbox
-                            color="primary"
+                            sx={{
+                              color: "rgb(19, 38, 77)",
+                              "&.Mui-checked": { color: "rgb(19, 38, 77)" },
+                            }}
                             onChange={() => handleStatusChange(game.id)}
                             aria-label="Change status to available"
                           />
                         }
                         label="Mark as Available"
+                        sx={{ fontWeight: "bold" }}
                       />
                     )}
                   </CardContent>
