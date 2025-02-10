@@ -1,7 +1,7 @@
 {
   "hosting": {
     "site": "fastclick-firestore",
-    "public": "dist",
+    "public": "build",
     "ignore": [
       "firebase.json",
       "**/.*",
